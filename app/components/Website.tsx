@@ -248,9 +248,7 @@ const Website = () => {
                   Social Security Card application
                 </li>
                 <li className="flex items-center gap-2">
-                  <ArrowRight size={16} className="text-green-500" />
-                  California Driver's License requirements
-                </li>
+                  <ArrowRight size={16} className="text-green-500" />California Driver's License requirements</li>
                 <li className="flex items-center gap-2">
                   <ArrowRight size={16} className="text-green-500" />
                   Employment authorization documents
