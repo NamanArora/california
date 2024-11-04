@@ -1,20 +1,20 @@
 "use client";
 import React, { useState } from 'react';
 
-import { ArrowRight, ArrowUp } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import StepButtons from './StepButtons';
 
 const Website = () => {
   const [activeModal, setActiveModal] = useState(null);
 
-  const sections = [
-    { id: 'survival', title: 'Daily Survival Guide', color: 'from-orange-400 to-red-400' },
-    { id: 'tips', title: 'Practical Tips', color: 'from-blue-400 to-blue-500' },
-    { id: 'legal', title: 'Legal Checklist', color: 'from-green-400 to-green-500' },
-    { id: 'emergency', title: 'Emergency Info', color: 'from-yellow-400 to-orange-400' },
-    { id: 'therawin', title: 'Therawin CTA', color: 'from-purple-400 to-pink-400' }
-  ];
+  // const sections = [
+  //   { id: 'survival', title: 'Daily Survival Guide', color: 'from-orange-400 to-red-400' },
+  //   { id: 'tips', title: 'Practical Tips', color: 'from-blue-400 to-blue-500' },
+  //   { id: 'legal', title: 'Legal Checklist', color: 'from-green-400 to-green-500' },
+  //   { id: 'emergency', title: 'Emergency Info', color: 'from-yellow-400 to-orange-400' },
+  //   { id: 'therawin', title: 'Therawin CTA', color: 'from-purple-400 to-pink-400' }
+  // ];
 
   const survivalGuideContent = {
     banking: {
@@ -78,9 +78,9 @@ const Website = () => {
     }
   ];
 
-  const scrollToSection = (id) => {
-    document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
-  };
+  // const scrollToSection = (id) => {
+  //   document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
+  // };
 
   return (
     <div className="min-h-screen">
