@@ -44,7 +44,7 @@ const StepButtons = () => {
         }
     ];
 
-    const scrollToSection = (id) => {
+    const scrollToSection = (id: string) => {
         document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
     };
 
@@ -67,7 +67,7 @@ const StepButtons = () => {
                         <div
                             key={step.id}
                             className="relative group"
-                            onMouseEnter={() => setHoveredStep(index)}
+                            onMouseEnter={() => setHoveredStep(null)}
                             onMouseLeave={() => setHoveredStep(null)}
                         >
                             <button

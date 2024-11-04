@@ -204,7 +204,7 @@ const Website = () => {
                   <h3 className="text-xl font-bold mb-2">{tip.title}</h3>
                   <p className="text-gray-600">{tip.content.substring(0, 100)}...</p>
                   <button
-                    onClick={() => setActiveModal(index)}
+                    onClick={() => setActiveModal(null)}
                     className="mt-4 bg-blue-500 text-white px-4 py-2 rounded-lg 
                              hover:bg-blue-600 transition-colors flex items-center gap-2"
                   >
