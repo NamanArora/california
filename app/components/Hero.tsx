@@ -25,12 +25,11 @@ const AnimatedTherapyType = () => {
       {/* First line with animated text */}
       <div className="flex flex-wrap items-center gap-2 justify-center md:justify-start">
         <span
-          className={`text-purple-700 transition-opacity duration-500 min-w-[120px] text-center md:text-left text-4xl md:text-[80px] font-semibold ${isVisible ? 'opacity-100' : 'opacity-0'
+          className={`text-purple-700 transition-opacity duration-500 min-w-[110px] text-center md:text-left text-4xl md:text-[80px] font-semibold ${isVisible ? 'opacity-100' : 'opacity-0'
             }`}
         >
           {therapyTypes[currentIndex]}
         </span>
-        <span className="inline-block text-4xl md:text-[80px]">👩🏽</span>
         <span className="text-black-700 text-4xl md:text-[80px] font-semibold">Therapy</span>
       </div>
 
