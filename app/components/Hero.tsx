@@ -43,7 +43,7 @@ const AnimatedTherapyType = () => {
 
 const TherapistCardOverlap = () => {
   return (
-    <div className="bg-white p-4 md:p-6 rounded-2xl shadow-lg h-full min-h-[200px] flex flex-col">
+    <div className="opacity-100 bg-white p-4 md:p-6 rounded-2xl shadow-lg h-full min-h-[200px] flex flex-col">
       <div className="flex-grow flex items-center justify-center">
         <div className="flex -space-x-6">
           <div className="min-w-[7rem] w-28 aspect-square relative">
@@ -240,6 +240,7 @@ const TherapyLandingPage = () => {
       </Head>
 
       <div className="min-h-screen bg-gradient-to-br from-yellow-300 to-orange-400 p-4 md:p-8">
+        
         {/* Semantic HTML structure for better SEO */}
         <div className="absolute inset-0">
           <svg xmlns="http://www.w3.org/2000/svg"

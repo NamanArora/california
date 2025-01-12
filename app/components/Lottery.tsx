@@ -185,7 +185,7 @@ const SlotMachine = () => {
           </div>
           
           {/* Custom spinning keyframes */}
-          <style jsx global>{`
+          {/* <style jsx global>{`
             @keyframes slot-spin {
               0% { 
                 transform: translateY(0);
@@ -235,7 +235,7 @@ const SlotMachine = () => {
             .animate-glow {
               animation: glow 2s ease-in-out infinite;
             }
-          `}</style>
+          `}</style> */}
 
           {/* Button */}
           <button
