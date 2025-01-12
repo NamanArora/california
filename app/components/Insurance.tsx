@@ -1,4 +1,5 @@
 "use client"
+
 import React, { useState, useRef, useEffect } from 'react';
 import { Shield, Check, ArrowRight, PhoneCall, ClipboardCheck, Heart, Users, Brain, Sparkles, ChevronDown, DollarSign, Fingerprint, HeartHandshake } from 'lucide-react';
 import { Globe2, MessageCircle, BookOpen } from 'lucide-react';
@@ -61,8 +62,18 @@ const OceanHero = () => (
     </div>
 );
 
+interface Stat {
+    value: string;
+    label: string;
+    icon: React.ReactNode;
+}
+
+interface StatsTwoColumnLayoutProps {
+    stats: Stat[];
+}
+
 // Option 4: Two Column Grid
-const StatsTwoColumnLayout = ({ stats }) => (
+const StatsTwoColumnLayout: React.FC<StatsTwoColumnLayoutProps> = ({ stats }) => (
     <div className="grid grid-cols-3 gap-4 mb-12 px-4">
         {stats.map((stat, index) => (
             <div key={index} className="bg-purple-50 rounded-lg p-4 text-center">
@@ -74,34 +85,6 @@ const StatsTwoColumnLayout = ({ stats }) => (
                 </p>
             </div>
         ))}
-    </div>
-);
-
-// Option 5: Featured Stat with List
-const StatsFeaturedLayout = ({ stats }) => (
-    <div className="mb-12 px-4">
-        {/* Featured Stat */}
-        <div className="bg-purple-100 rounded-lg p-6 text-center mb-4">
-            <p className="text-4xl font-bold text-purple-600 mb-2">
-                {stats[0].value}
-            </p>
-            <p className="text-sm text-purple-900">
-                {stats[0].label}
-            </p>
-        </div>
-        {/* Other Stats */}
-        <div className="grid grid-cols-2 gap-4">
-            {stats.slice(1).map((stat, index) => (
-                <div key={index} className="bg-purple-50 rounded-lg p-4 text-center">
-                    <p className="text-2xl font-bold text-purple-600 mb-1">
-                        {stat.value}
-                    </p>
-                    <p className="text-xs text-gray-600">
-                        {stat.label}
-                    </p>
-                </div>
-            ))}
-        </div>
     </div>
 );
 
@@ -278,9 +261,20 @@ const Copay = () => (
     </div>
 );
 
+interface AccordionItemProps {
+    question: string;
+    answer: string;
+    isOpen: boolean;
+    onClick: () => void;
+}
 
 
-const AccordionItem = ({ question, answer, isOpen, onClick }) => {
+const AccordionItem: React.FC<AccordionItemProps> = ({
+    question,
+    answer,
+    isOpen,
+    onClick
+}) => {
     return (
         <div className="bg-white rounded-xl shadow-sm overflow-hidden">
             <button
@@ -402,10 +396,10 @@ const OceanCoverageSection = () => (
                     {/* Decorative wave pattern */}
                     <div className="absolute inset-0 opacity-10 group-hover:opacity-20 transition-opacity">
                         <svg className="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
-                            <path d="M0 50 Q 25 40, 50 50 T 100 50 V100 H0 Z" fill="currentColor" className="text-blue-500"/>
+                            <path d="M0 50 Q 25 40, 50 50 T 100 50 V100 H0 Z" fill="currentColor" className="text-blue-500" />
                         </svg>
                     </div>
-                    
+
                     <div className="relative z-10">
                         <div className="inline-flex justify-center items-center w-12 h-12 md:w-16 md:h-16 bg-blue-600 rounded-full mb-4 md:mb-6">
                             <Shield className="w-6 h-6 md:w-8 md:h-8 text-white" />
@@ -420,10 +414,10 @@ const OceanCoverageSection = () => (
                     {/* Decorative wave pattern */}
                     <div className="absolute inset-0 opacity-10 group-hover:opacity-20 transition-opacity">
                         <svg className="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
-                            <path d="M0 50 Q 25 40, 50 50 T 100 50 V100 H0 Z" fill="currentColor" className="text-cyan-500"/>
+                            <path d="M0 50 Q 25 40, 50 50 T 100 50 V100 H0 Z" fill="currentColor" className="text-cyan-500" />
                         </svg>
                     </div>
-                    
+
                     <div className="relative z-10">
                         <div className="inline-flex justify-center items-center w-12 h-12 md:w-16 md:h-16 bg-cyan-600 rounded-full mb-4 md:mb-6">
                             <Shield className="w-6 h-6 md:w-8 md:h-8 text-white" />
@@ -438,10 +432,10 @@ const OceanCoverageSection = () => (
                     {/* Decorative wave pattern */}
                     <div className="absolute inset-0 opacity-10 group-hover:opacity-20 transition-opacity">
                         <svg className="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
-                            <path d="M0 50 Q 25 40, 50 50 T 100 50 V100 H0 Z" fill="currentColor" className="text-blue-500"/>
+                            <path d="M0 50 Q 25 40, 50 50 T 100 50 V100 H0 Z" fill="currentColor" className="text-blue-500" />
                         </svg>
                     </div>
-                    
+
                     <div className="relative z-10">
                         <div className="inline-flex justify-center items-center w-12 h-12 md:w-16 md:h-16 bg-blue-600 rounded-full mb-4 md:mb-6">
                             <Shield className="w-6 h-6 md:w-8 md:h-8 text-white" />
@@ -472,7 +466,7 @@ const OceanTherapyTypes = () => {
             name: "Anxiety",
             icon: <Sparkles className="w-6 h-6 md:w-8 md:h-8" />,
             description: "Overcome anxiety and stress with evidence-based techniques",
-            color: "bg-blue-50",
+            color: "bg-blue-100",
             iconBg: "bg-blue-100",
             iconColor: "text-blue-600",
             benefits: ["Stress management", "Panic attack control", "Worry reduction"]
@@ -490,7 +484,7 @@ const OceanTherapyTypes = () => {
             name: "Couples",
             icon: <Users className="w-6 h-6 md:w-8 md:h-8" />,
             description: "Strengthen relationships and improve communication",
-            color: "bg-blue-50",
+            color: "bg-blue-100",
             iconBg: "bg-blue-100",
             iconColor: "text-blue-600",
             benefits: ["Better communication", "Conflict resolution", "Deeper connection"]
@@ -507,12 +501,15 @@ const OceanTherapyTypes = () => {
     ];
 
     useEffect(() => {
-        let scrollInterval;
+        let scrollInterval: NodeJS.Timeout | undefined;
+
         if (isAutoScrolling && scrollContainerRef.current && window.innerWidth < 768) {
             scrollInterval = setInterval(() => {
-                const container = scrollContainerRef.current;
+                const container = scrollContainerRef.current as HTMLDivElement | null;
+
                 if (container) {
-                    const isAtEnd = container.scrollLeft + container.clientWidth >= container.scrollWidth;
+                    const isAtEnd: boolean = container.scrollLeft + container.clientWidth >= container.scrollWidth;
+
                     if (isAtEnd) {
                         container.scrollTo({ left: 0, behavior: 'smooth' });
                     } else {
@@ -776,24 +773,24 @@ const OceanCommitment = () => {
                     <h2 className="text-2xl md:text-4xl font-bold text-blue-900 mb-3">
                         Our Commitment to Cultural Competency
                     </h2>
-                    
+
                     {/* Stats Grid */}
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
                         {stats.map((stat, index) => (
-                            <div key={index} 
+                            <div key={index}
                                 className="bg-white rounded-xl p-6 shadow-sm hover:shadow-md 
                                     transition-shadow relative overflow-hidden group">
                                 {/* Wave Pattern Background */}
                                 <div className="absolute inset-0 opacity-5 group-hover:opacity-10 
                                     transition-opacity">
-                                    <svg className="w-full h-full" viewBox="0 0 100 100" 
+                                    <svg className="w-full h-full" viewBox="0 0 100 100"
                                         preserveAspectRatio="none">
-                                        <path d="M0 50 Q 25 40, 50 50 T 100 50 V100 H0 Z" 
-                                            fill="currentColor" 
+                                        <path d="M0 50 Q 25 40, 50 50 T 100 50 V100 H0 Z"
+                                            fill="currentColor"
                                             className="text-blue-600" />
                                     </svg>
                                 </div>
-                                
+
                                 {/* Content */}
                                 <div className="relative z-10">
                                     <div className="flex justify-center mb-4">
@@ -836,9 +833,9 @@ const OceanCommitment = () => {
                     </div>
 
                     <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-                        We believe that effective therapy must acknowledge and embrace cultural 
-                        differences. Our commitment to cultural competency ensures that your 
-                        unique background and experiences are understood and valued throughout 
+                        We believe that effective therapy must acknowledge and embrace cultural
+                        differences. Our commitment to cultural competency ensures that your
+                        unique background and experiences are understood and valued throughout
                         your healing journey.
                     </p>
                 </div>
