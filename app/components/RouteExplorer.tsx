@@ -2,22 +2,32 @@ import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Command, Rocket, Star, ExternalLink } from 'lucide-react';
 
-const StarWarsPlayground = () => {
-  const [routes, setRoutes] = useState([]);
-  const [error, setError] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
+interface Route {
+  path: string;
+  displayName: string;
+  depth: number;
+}
+
+interface ApiResponse {
+  routes: string[];
+}
+
+const StarWarsPlayground: React.FC = () => {
+  const [routes, setRoutes] = useState<Route[]>([]);
+  const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
-    const fetchRoutes = async () => {
+    const fetchRoutes = async (): Promise<void> => {
       try {
         const response = await fetch('/api/routes');
         if (!response.ok) throw new Error('Failed to fetch routes');
-        const data = await response.json();
+        const data: ApiResponse = await response.json();
         
         // Clean and organize routes
-        const cleanedRoutes = data.routes
-          .filter(route => !route.startsWith('api/') && !route.startsWith('_'))
-          .map(route => {
+        const cleanedRoutes: Route[] = data.routes
+          .filter((route: string) => !route.startsWith('api/') && !route.startsWith('_'))
+          .map((route: string) => {
             const cleanPath = route
               .replace(/\/page$/, '')
               .replace(/^\/?/, '')
@@ -26,7 +36,7 @@ const StarWarsPlayground = () => {
             // Convert route to display name
             const displayName = cleanPath
               .split('/')
-              .pop()
+              .pop()!
               .split('-')
               .map(word => word.charAt(0).toUpperCase() + word.slice(1))
               .join(' ');
@@ -41,7 +51,7 @@ const StarWarsPlayground = () => {
         setRoutes(cleanedRoutes);
         setIsLoading(false);
       } catch (err) {
-        setError(err.message);
+        setError(err instanceof Error ? err.message : 'An error occurred');
         setIsLoading(false);
       }
     };
@@ -49,7 +59,7 @@ const StarWarsPlayground = () => {
     fetchRoutes();
   }, []);
 
-  const renderStarField = () => (
+  const renderStarField = (): JSX.Element => (
     <div className="absolute inset-0 overflow-hidden pointer-events-none">
       {[...Array(50)].map((_, i) => (
         <div
@@ -65,7 +75,7 @@ const StarWarsPlayground = () => {
     </div>
   );
 
-  const renderRoute = (route) => {
+  const renderRoute = (route: Route): JSX.Element => {
     const indent = route.depth * 16;
     
     return (
@@ -112,7 +122,7 @@ const StarWarsPlayground = () => {
             Naman's Playground
           </h1>
           <p className="text-lg text-gray-400">
-            My crazy web designs for Therawin
+            Explore a galaxy of web experiments
           </p>
         </div>
 
