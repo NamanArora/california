@@ -1,7 +1,15 @@
 import React from 'react';
 import { MessageCircle, Heart, Users } from 'lucide-react';
 
-const OutreachMemberCard = ({ member }) => {
+interface OutreachMember {
+  name: string;
+  role: string;
+  image: string;
+  bio: string;
+  focus: string[];
+ }
+
+const OutreachMemberCard = ({ member }: { member: OutreachMember }) => {
   return (
     <div className="relative group">
       {/* Background Pattern */}

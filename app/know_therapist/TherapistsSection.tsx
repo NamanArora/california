@@ -1,7 +1,22 @@
 import React from 'react';
 import { Calendar, Globe2, Award, ArrowRight } from 'lucide-react';
 
-const TherapistCard = ({ therapist }) => {
+interface Therapist {
+  name: string;
+  title: string;
+  image: string;
+  specialties: string[];
+  bio: string;
+  languages?: string[];
+  education?: string;
+  achievements?: string[];
+  contact?: {
+    email?: string;
+    phone?: string;
+  };
+ }
+
+const TherapistCard = ({ therapist }: { therapist: Therapist }) => {
   return (
     <div className="bg-white rounded-2xl shadow-lg overflow-hidden transition-transform hover:scale-[1.02] focus-within:scale-[1.02]">
       <div className="aspect-w-3 aspect-h-4 relative">

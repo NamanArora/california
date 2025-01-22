@@ -1,7 +1,22 @@
 import React from 'react';
 import { Calendar, Star, Shield, ArrowRight, Clock } from 'lucide-react';
 
-const TherapistCard = ({ therapist }) => {
+interface Therapist {
+  name: string;
+  title: string;
+  image: string;
+  specialties: string[];
+  bio: string;
+  languages?: string[];
+  education?: string;
+  achievements?: string[];
+  contact?: {
+    email?: string;
+    phone?: string;
+  };
+ }
+
+const TherapistCard = ({ therapist }: {therapist: Therapist}) => {
   return (
     <div className="bg-white rounded-3xl shadow-xl overflow-hidden group hover:shadow-2xl transition-shadow duration-300">
       {/* Image Section - Larger and more prominent */}
