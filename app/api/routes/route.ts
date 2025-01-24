@@ -27,6 +27,12 @@ async function getAppRoutes(dir: string, baseDir: string): Promise<string[]> {
   return routes;
 }
 
+const hardcodedRoutes = () => {
+  return [
+    ''
+  ];
+}
+
 export async function GET() {
   try {
     const appDir = path.join(process.cwd(), 'app');
