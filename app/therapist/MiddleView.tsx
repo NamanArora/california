@@ -2,12 +2,121 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip,
-  Legend, ResponsiveContainer, BarChart, Bar
+  Legend, ResponsiveContainer, BarChart, Bar,
+  PolarAngleAxis,
+  PolarGrid,
+  PolarRadiusAxis,
+  RadarChart,
+  Radar
 } from 'recharts';
 import {
   Brain, Heart, MessageCircle, Zap, TrendingUp,
-  Calendar, Clock, AlertCircle
+  Calendar, Clock, AlertCircle,
+  Shield,
+  Star,
+  Search
 } from 'lucide-react';
+
+import { Button } from "@/components/ui/button";
+
+
+interface CustomTooltipProps {
+  active?: boolean;
+  payload?: any[];
+  label?: string;
+  onInvestigate?: (session: number) => void;
+}
+
+const CustomTooltip: React.FC<CustomTooltipProps> = ({ active, payload, label, onInvestigate }) => {
+  if (active && payload && payload.length) {
+    const handleClick = (e: React.MouseEvent) => {
+      console.log("click detected");
+      if (onInvestigate) {
+        onInvestigate(Number(label));
+      }
+    };
+
+    return (
+      <div className="bg-white p-4 rounded-lg shadow-lg border border-gray-200">
+        <div className="mb-3">
+          <p className="font-medium text-gray-900">Session {label}</p>
+          {payload.map((entry, index) => (
+            <p key={index} className="text-sm text-gray-600">
+              {entry.name}: {entry.value}%
+            </p>
+          ))}
+        </div>
+        <button
+          className="w-full px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-md flex items-center justify-center gap-2 transition-colors"
+          onClick={handleClick}
+        >
+          <Search className="h-4 w-4" />
+          Investigate Session
+        </button>
+      </div>
+    );
+  }
+  return null;
+};
+
+const ProgressChart: React.FC<{ data: any[]; onInvestigate: (session: number) => void }> = ({ data, onInvestigate }) => {
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Progress Over Time</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="h-80">
+          <ResponsiveContainer width="100%" height="100%">
+            <LineChart data={data}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="session" />
+              <YAxis domain={[0, 100]} />
+              <Tooltip content={<CustomTooltip onInvestigate={onInvestigate} />} />
+              <Legend />
+              <Line
+                type="monotone"
+                dataKey="empathy"
+                stroke="#3B82F6"
+                name="Empathy"
+                strokeWidth={2}
+                dot={{ r: 6, strokeWidth: 2, fill: "white" }}
+                activeDot={{ r: 8, strokeWidth: 2 }}
+              />
+              <Line
+                type="monotone"
+                dataKey="engagement"
+                stroke="#60A5FA"
+                name="Engagement"
+                strokeWidth={2}
+                dot={{ r: 6, strokeWidth: 2, fill: "white" }}
+                activeDot={{ r: 8, strokeWidth: 2 }}
+              />
+              <Line
+                type="monotone"
+                dataKey="communication"
+                stroke="#93C5FD"
+                name="Communication"
+                strokeWidth={2}
+                dot={{ r: 6, strokeWidth: 2, fill: "white" }}
+                activeDot={{ r: 8, strokeWidth: 2 }}
+              />
+              <Line
+                type="monotone"
+                dataKey="intervention"
+                stroke="#BFDBFE"
+                name="Intervention"
+                strokeWidth={2}
+                dot={{ r: 6, strokeWidth: 2, fill: "white" }}
+                activeDot={{ r: 8, strokeWidth: 2 }}
+              />
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
+      </CardContent>
+    </Card>
+  );
+};
 
 interface SessionData {
   date: string;
@@ -34,12 +143,49 @@ const ClientView: React.FC<ClientViewProps> = ({ clientName, onSessionSelect }) 
     { session: 4, empathy: 89, engagement: 83, communication: 78, intervention: 75 }
   ];
 
+  const compatibilitySubScores = [
+    { name: 'Qualifications', score: 8 },
+    { name: 'Client Well-being', score: 9 },
+    { name: 'Goals Exploration', score: 7 },
+    { name: 'Active Listening', score: 9 },
+    { name: 'Strategy Suggestions', score: 6 },
+    { name: 'Validation', score: 9 },
+    { name: 'Collaboration', score: 8 },
+    { name: 'Past Experience', score: 7 },
+    { name: 'Daily Routine', score: 6 },
+    { name: 'Psychoeducation', score: 7 }
+  ];
+
+  const areasOfImprovement = [
+    {
+      suggestion: "Involve client more in defining specific goals for therapy",
+      excerpt: "Therapist: 'What would you like to focus on today?' Client: 'I'm not sure yet.'"
+    },
+    {
+      suggestion: "Provide clearer strategies to address challenges",
+      excerpt: "Therapist: 'You might find journaling helpful.' Client: 'I've tried it before, but it didn't work for me.'"
+    },
+    {
+      suggestion: "Explore daily routine in greater detail",
+      excerpt: "Therapist: 'Can you tell me about your typical day?' Client: 'It's just work and home stuff.'"
+    }
+  ];
+
   const handleSessionClick = (session: SessionData) => {
     if (onSessionSelect) {
       onSessionSelect(session.date);
     }
   };
 
+  const handleInvestigate = (session: number) => {
+    console.log("Investigating session:", session);
+    // Find the session data that corresponds to this session number
+    const sessionDate = sessionData[session - 1]?.date;
+    console.log("Found session date:", sessionDate);
+    if (sessionDate && onSessionSelect) {
+      onSessionSelect(sessionDate);
+    }
+  };
   // Sample session data
   const sessionData = [
     {
@@ -139,53 +285,67 @@ const ClientView: React.FC<ClientViewProps> = ({ clientName, onSessionSelect }) 
         </Card>
       </div>
 
-      {/* Progress Chart */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Progress Over Time</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="h-80">
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={trendData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="session" />
-                <YAxis domain={[0, 100]} />
-                <Tooltip />
-                <Legend />
-                <Line
-                  type="monotone"
-                  dataKey="empathy"
-                  stroke="#3B82F6"
-                  name="Empathy"
-                  strokeWidth={2}
-                />
-                <Line
-                  type="monotone"
-                  dataKey="engagement"
-                  stroke="#60A5FA"
-                  name="Engagement"
-                  strokeWidth={2}
-                />
-                <Line
-                  type="monotone"
-                  dataKey="communication"
-                  stroke="#93C5FD"
-                  name="Communication"
-                  strokeWidth={2}
-                />
-                <Line
-                  type="monotone"
-                  dataKey="intervention"
-                  stroke="#BFDBFE"
-                  name="Intervention"
-                  strokeWidth={2}
-                />
-              </LineChart>
-            </ResponsiveContainer>
-          </div>
-        </CardContent>
-      </Card>
+      <ProgressChart data={trendData} onInvestigate={handleInvestigate} />
+
+
+      <div className="grid grid-cols-2 gap-6">
+        {/* Overall Compatibility */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Shield className="h-5 w-5 text-blue-500" />
+              Average Compatibility Score
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-center justify-between mb-6">
+              <div className="text-center">
+                <div className="text-4xl font-bold text-blue-600">85%</div>
+                <p className="text-sm text-gray-600 mt-1">Therapeutic Alignment</p>
+              </div>
+              <div className="text-sm text-gray-600 max-w-xs">
+                Strong skills in active listening, validation, and exploration of client's feelings and experiences. Some areas for improvement in goal-setting and strategy provision.
+              </div>
+            </div>
+            <div className="h-64">
+              <ResponsiveContainer width="100%" height="100%">
+                <RadarChart data={compatibilitySubScores}>
+                  <PolarGrid />
+                  <PolarAngleAxis dataKey="name" />
+                  <PolarRadiusAxis domain={[0, 10]} />
+                  <Radar
+                    name="Score"
+                    dataKey="score"
+                    stroke="#3B82F6"
+                    fill="#3B82F6"
+                    fillOpacity={0.5}
+                  />
+                </RadarChart>
+              </ResponsiveContainer>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Areas of Improvement */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Star className="h-5 w-5 text-blue-500" />
+              Areas of Improvement
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {areasOfImprovement.map((area, index) => (
+                <div key={index} className="bg-blue-50 p-4 rounded-lg">
+                  <h4 className="font-medium text-blue-900 mb-2">{area.suggestion}</h4>
+                  <p className="text-sm text-gray-600 italic">"{area.excerpt}"</p>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
 
       {/* Session History Table */}
       <Card>
