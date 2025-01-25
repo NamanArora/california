@@ -18,6 +18,10 @@ import {
 import MyClientsPage from './MyClientsPage';
 import TeamsTab from './TeamsTab';
 import AnalyticsTab from './AnalyticsTab';
+import ClientView from './AnalyticsTab';
+import TherapistView from './TherapistView';
+import SupervisorView from './SupervisorView';
+import TherapistDashboard from './TopView';
 
 // Sample data for demonstration
 const performanceData = [
@@ -196,8 +200,8 @@ const DashboardContent = () => {
                                         <p className="text-sm text-slate-600">{session.time}</p>
                                     </div>
                                     <span className={`text-sm px-2 py-1 rounded ${session.status === 'Confirmed'
-                                            ? 'bg-green-50 text-green-700'
-                                            : 'bg-amber-50 text-amber-700'
+                                        ? 'bg-green-50 text-green-700'
+                                        : 'bg-amber-50 text-amber-700'
                                         }`}>
                                         {session.status}
                                     </span>
@@ -257,7 +261,7 @@ const Dashboard = () => {
         { id: 'dashboard', name: 'Dashboard', icon: Home },
         { id: 'clients', name: 'My Clients', icon: UserCircle },
         { id: 'team', name: 'Team', icon: Users },
-        { id: 'analytics', name: 'Analytics', icon: BarChart },
+        { id: 'topView', name: 'Overall Analytics', icon: BarChart },
     ];
 
     const renderContent = () => {
@@ -268,8 +272,8 @@ const Dashboard = () => {
                 return <MyClientsPage />;
             case 'team':
                 return <TeamsTab />;
-            case 'analytics':
-                return <AnalyticsTab />;
+            case 'topView':
+                return <TherapistDashboard />;
             default:
                 return <DashboardContent />;
         }
