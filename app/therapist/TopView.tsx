@@ -32,6 +32,7 @@ const TherapistDashboard: React.FC = () => {
     const [selectedTherapist, setSelectedTherapist] = useState<string | null>(null);
     const [selectedPatient, setSelectedPatient] = useState<string | null>(null);
     const [selectedSession, setSelectedSession] = useState<string | null>(null);
+    const [searchQuery, setSearchQuery] = useState<string>('');
 
     const handleSessionSelect = (sessionDate: string): void => {
         setSelectedSession(sessionDate);
