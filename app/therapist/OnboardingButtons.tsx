@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, ChangeEvent } from 'react';
 import { Button } from "@/components/ui/button";
 import {
     Dialog,
@@ -12,12 +12,23 @@ import { UserPlus, Mail, Loader2, X } from 'lucide-react';
 import { toast } from "sonner"
 
 const OnboardingButtons = () => {
-    const [loading, setLoading] = useState(false);
-    const [currentStep, setCurrentStep] = useState(0);
-    const [isDialogOpen, setIsDialogOpen] = useState(false);
-    const [inviteLoading, setInviteLoading] = useState(false);
-    const [isInviteDialogOpen, setIsInviteDialogOpen] = useState(false);
-    const [formData, setFormData] = useState({
+    interface FormData {
+        name: string;
+        role: string;
+        mobile: string;
+        email: string;
+        bio: string;
+        insurance: string[];
+        qualifications: string[];
+        availability: string[][];
+    }
+
+    const [loading, setLoading] = useState<boolean>(false);
+    const [currentStep, setCurrentStep] = useState<number>(0);
+    const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false);
+    const [inviteLoading, setInviteLoading] = useState<boolean>(false);
+    const [isInviteDialogOpen, setIsInviteDialogOpen] = useState<boolean>(false);
+    const [formData, setFormData] = useState<FormData>({
         name: '',
         role: '',
         mobile: '',
@@ -27,7 +38,7 @@ const OnboardingButtons = () => {
         qualifications: [],
         availability: Array(7).fill([])
     });
-    const [inviteEmail, setInviteEmail] = useState('');
+    const [inviteEmail, setInviteEmail] = useState<string>('');
 
     const insuranceOptions = [
         "Blue Cross Blue Shield",
@@ -48,7 +59,7 @@ const OnboardingButtons = () => {
 
     };
 
-    const handleInsuranceChange = (e) => {
+    const handleInsuranceChange = (e: ChangeEvent<HTMLInputElement>): void => {
         const value = e.target.value;
         if (value && !formData.insurance.includes(value)) {
             setFormData({ ...formData, insurance: [...formData.insurance, value] });
@@ -56,14 +67,21 @@ const OnboardingButtons = () => {
         }
     };
 
-    const removeInsurance = (insurance) => {
-        setFormData({ ...formData, insurance: formData.insurance.filter(item => item !== insurance) });
+    const removeInsurance = (insurance: string): void => {
+        setFormData({
+            ...formData,
+            insurance: formData.insurance.filter(item => item !== insurance)
+        });
     };
 
-    const handleAvailabilityChange = (dayIndex, selectedOptions) => {
+    const handleAvailabilityChange = (dayIndex: number, selectedOptions: HTMLCollectionOf<HTMLOptionElement>): void => {
         const newAvailability = [...formData.availability];
         newAvailability[dayIndex] = Array.from(selectedOptions).map(option => option.value);
         setFormData({ ...formData, availability: newAvailability });
+    };
+
+    const handleInputChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>, field: keyof FormData): void => {
+        setFormData({ ...formData, [field]: e.target.value });
     };
 
     const handleInviteTherapist = () => {
@@ -132,7 +150,7 @@ const OnboardingButtons = () => {
                                                 className="w-full px-3 py-2 border rounded-md"
                                                 placeholder="Dr. Jane Smith"
                                                 value={formData.name}
-                                                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                                                onChange={(e) => handleInputChange(e, 'name')}
                                             />
                                         </div>
                                         <div className="space-y-2">

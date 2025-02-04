@@ -3,26 +3,27 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
-import { 
-  Bell, 
-  AlertTriangle, 
-  ArrowUpRight, 
-  Users, 
-  Activity, 
-  TrendingUp,
-  Home,
-  UserCircle,
-  BarChart,
-  Brain,
-  Settings,
-  ChevronLeft,
-  ChevronRight,
-  LogOut,
-  HelpCircle
+import {
+    Bell,
+    AlertTriangle,
+    ArrowUpRight,
+    Users,
+    Activity,
+    TrendingUp,
+    Home,
+    UserCircle,
+    BarChart,
+    Brain,
+    Settings,
+    ChevronLeft,
+    ChevronRight,
+    LogOut,
+    HelpCircle
 } from 'lucide-react';
 import MyClientsPage from './MyClientsPage';
 import TeamsTab from './TeamsTab';
 import AnalyticsTab from './AnalyticsTab';
+import ClientDetailsPage from './ClientDetailsPage';
 
 // Sample data for demonstration
 const performanceData = [
@@ -258,126 +259,129 @@ const DashboardContent = () => {
 const Dashboard = () => {
     const [activeTab, setActiveTab] = useState('dashboard');
     const [isDrawerCollapsed, setIsDrawerCollapsed] = useState(false);
-  
+
     const mainTabs = [
-      { id: 'dashboard', name: 'Dashboard', icon: Home },
-      { id: 'clients', name: 'My Clients', icon: UserCircle },
-      { id: 'team', name: 'Team', icon: Users },
-      { id: 'analytics', name: 'Analytics', icon: BarChart },
+        { id: 'dashboard', name: 'Dashboard', icon: Home },
+        { id: 'clients', name: 'My Clients', icon: UserCircle },
+        { id: 'team', name: 'Team', icon: Users },
+        { id: 'analytics', name: 'Analytics', icon: BarChart },
+        { id: 'clientDetails', name: 'Client Details', icon: Users },
     ];
-  
+
     const settingsTabs = [
-      { id: 'settings', name: 'Settings', icon: Settings },
-      { id: 'help', name: 'Help & Support', icon: HelpCircle },
-      { id: 'logout', name: 'Logout', icon: LogOut },
+        { id: 'settings', name: 'Settings', icon: Settings },
+        { id: 'help', name: 'Help & Support', icon: HelpCircle },
+        { id: 'logout', name: 'Logout', icon: LogOut },
     ];
-  
+
     const renderContent = () => {
-      switch (activeTab) {
-        case 'dashboard':
-          return <DashboardContent />;
-        case 'clients':
-          return <MyClientsPage />;
-        case 'team':
-          return <TeamsTab />;
-        case 'analytics':
-          return <AnalyticsTab />;
-        case 'settings':
-          return <div className="p-6"><h2 className="text-2xl font-bold">Settings</h2></div>;
-        case 'help':
-          return <div className="p-6"><h2 className="text-2xl font-bold">Help & Support</h2></div>;
-        default:
-          return <DashboardContent />;
-      }
+        switch (activeTab) {
+            case 'dashboard':
+                return <DashboardContent />;
+            case 'clients':
+                return <MyClientsPage />;
+            case 'team':
+                return <TeamsTab />;
+            case 'analytics':
+                return <AnalyticsTab />;
+            case 'settings':
+                return <div className="p-6"><h2 className="text-2xl font-bold">Settings</h2></div>;
+            case 'help':
+                return <div className="p-6"><h2 className="text-2xl font-bold">Help & Support</h2></div>;
+            case 'clientDetails':
+                return <ClientDetailsPage />
+            default:
+                return <DashboardContent />;
+        }
     };
-  
+
     const handleLogout = () => {
-      // Handle logout logic here
-      console.log('Logging out...');
+        // Handle logout logic here
+        console.log('Logging out...');
     };
-  
+
     return (
-      <div className="flex h-screen bg-slate-50">
-        {/* Left Sidebar */}
-        <div className={`${isDrawerCollapsed ? 'w-25' : 'w-64'} bg-white border-r border-slate-200 flex flex-col relative transition-all duration-300`}>
-          {/* Toggle Button */}
-          <button
-            onClick={() => setIsDrawerCollapsed(!isDrawerCollapsed)}
-            className="absolute -right-3 top-20 bg-white border border-slate-200 rounded-full p-1 shadow-sm hover:bg-slate-50"
-          >
-            {isDrawerCollapsed ? 
-              <ChevronRight className="h-4 w-4 text-slate-600" /> : 
-              <ChevronLeft className="h-4 w-4 text-slate-600" />
-            }
-          </button>
-  
-          {/* Logo Area */}
-          <div className="h-16 border-b border-slate-200 flex items-center px-6">
-            {isDrawerCollapsed ? (
-              <Brain className="h-8 w-8 text-blue-600" />
-            ) : (
-              <h1 className="text-xl font-bold text-blue-600">MentalHealth AI</h1>
-            )}
-          </div>
-          
-          {/* Main Navigation */}
-          <nav className="p-4 flex-grow">
-            {mainTabs.map((tab) => {
-              const Icon = tab.icon;
-              return (
+        <div className="flex h-screen bg-slate-50">
+            {/* Left Sidebar */}
+            <div className={`${isDrawerCollapsed ? 'w-25' : 'w-64'} bg-white border-r border-slate-200 flex flex-col relative transition-all duration-300`}>
+                {/* Toggle Button */}
                 <button
-                  key={tab.id}
-                  onClick={() => setActiveTab(tab.id)}
-                  className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg mb-1 text-left
-                    ${activeTab === tab.id 
-                      ? 'bg-blue-50 text-blue-600' 
-                      : 'text-slate-600 hover:bg-slate-50'}`}
+                    onClick={() => setIsDrawerCollapsed(!isDrawerCollapsed)}
+                    className="absolute -right-3 top-20 bg-white border border-slate-200 rounded-full p-1 shadow-sm hover:bg-slate-50"
                 >
-                  <Icon className="h-5 w-5 flex-shrink-0" />
-                  {!isDrawerCollapsed && <span className="font-medium">{tab.name}</span>}
+                    {isDrawerCollapsed ?
+                        <ChevronRight className="h-4 w-4 text-slate-600" /> :
+                        <ChevronLeft className="h-4 w-4 text-slate-600" />
+                    }
                 </button>
-              );
-            })}
-          </nav>
-  
-          {/* Settings Navigation */}
-          <div className="p-4 border-t border-slate-200">
-            {settingsTabs.map((tab) => {
-              const Icon = tab.icon;
-              return (
-                <button
-                  key={tab.id}
-                  onClick={tab.id === 'logout' ? handleLogout : () => setActiveTab(tab.id)}
-                  className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg mb-1 text-left
-                    ${activeTab === tab.id 
-                      ? 'bg-blue-50 text-blue-600' 
-                      : 'text-slate-600 hover:bg-slate-50'}`}
-                >
-                  <Icon className="h-5 w-5 flex-shrink-0" />
-                  {!isDrawerCollapsed && <span className="font-medium">{tab.name}</span>}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-  
-        {/* Main Content Area */}
-        <div className="flex-1 overflow-auto">
-          <div className="p-8">
-            {/* Header */}
-            <div className="mb-6">
-              <h1 className="text-2xl font-bold text-slate-800">
-                {[...mainTabs, ...settingsTabs].find(tab => tab.id === activeTab)?.name}
-              </h1>
-              <p className="text-slate-600">Welcome back, Dr. Smith</p>
+
+                {/* Logo Area */}
+                <div className="h-16 border-b border-slate-200 flex items-center px-6">
+                    {isDrawerCollapsed ? (
+                        <Brain className="h-8 w-8 text-blue-600" />
+                    ) : (
+                        <h1 className="text-xl font-bold text-blue-600">MentalHealth AI</h1>
+                    )}
+                </div>
+
+                {/* Main Navigation */}
+                <nav className="p-4 flex-grow">
+                    {mainTabs.map((tab) => {
+                        const Icon = tab.icon;
+                        return (
+                            <button
+                                key={tab.id}
+                                onClick={() => setActiveTab(tab.id)}
+                                className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg mb-1 text-left
+                    ${activeTab === tab.id
+                                        ? 'bg-blue-50 text-blue-600'
+                                        : 'text-slate-600 hover:bg-slate-50'}`}
+                            >
+                                <Icon className="h-5 w-5 flex-shrink-0" />
+                                {!isDrawerCollapsed && <span className="font-medium">{tab.name}</span>}
+                            </button>
+                        );
+                    })}
+                </nav>
+
+                {/* Settings Navigation */}
+                <div className="p-4 border-t border-slate-200">
+                    {settingsTabs.map((tab) => {
+                        const Icon = tab.icon;
+                        return (
+                            <button
+                                key={tab.id}
+                                onClick={tab.id === 'logout' ? handleLogout : () => setActiveTab(tab.id)}
+                                className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg mb-1 text-left
+                    ${activeTab === tab.id
+                                        ? 'bg-blue-50 text-blue-600'
+                                        : 'text-slate-600 hover:bg-slate-50'}`}
+                            >
+                                <Icon className="h-5 w-5 flex-shrink-0" />
+                                {!isDrawerCollapsed && <span className="font-medium">{tab.name}</span>}
+                            </button>
+                        );
+                    })}
+                </div>
             </div>
-  
-            {/* Dynamic Content */}
-            {renderContent()}
-          </div>
+
+            {/* Main Content Area */}
+            <div className="flex-1 overflow-auto">
+                <div className="p-8">
+                    {/* Header */}
+                    <div className="mb-6">
+                        <h1 className="text-2xl font-bold text-slate-800">
+                            {[...mainTabs, ...settingsTabs].find(tab => tab.id === activeTab)?.name}
+                        </h1>
+                        <p className="text-slate-600">Welcome back, Dr. Smith</p>
+                    </div>
+
+                    {/* Dynamic Content */}
+                    {renderContent()}
+                </div>
+            </div>
         </div>
-      </div>
     );
-  };
-  
-  export default Dashboard;
+};
+
+export default Dashboard;
