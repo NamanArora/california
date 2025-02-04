@@ -74,9 +74,6 @@ const TherapistCard = ({ therapist }: {therapist: Therapist}) => {
             Book Session
             <ArrowRight className="w-5 h-5" />
           </button>
-          <button className="flex-1 border-2 border-purple-600 text-purple-600 px-6 py-3 rounded-xl font-semibold hover:bg-purple-50 transition-colors">
-            View Profile
-          </button>
         </div>
       </div>
     </div>
