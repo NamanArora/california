@@ -60,6 +60,7 @@ import {
 } from 'lucide-react';
 import RealtimeSession from './RealtimeSession';
 import { useRouter } from 'next/navigation';
+import ZoomSessionDialog from './ZoomSessionDialog';
 
 const ClientDetailsPage: React.FC = () => {
     const [activeTab, setActiveTab] = useState('activity');
@@ -68,6 +69,7 @@ const ClientDetailsPage: React.FC = () => {
     const [isSessionModalOpen, setIsSessionModalOpen] = useState(false);
     const [selectedRecording, setSelectedRecording] = useState<Session | null>(null);
     const [showProgressNoteDetail, setShowProgressNoteDetail] = useState(false);
+    const [showZoomDialog, setShowZoomDialog] = useState(false);
     const router = useRouter();
 
     const client: Client = {
@@ -114,7 +116,7 @@ const ClientDetailsPage: React.FC = () => {
             type: "zoom",
             duration: "50 mins",
             topics: ["Anxiety", "Sleep"],
-            status: "Completed",
+            status: "In Progress",
             recording: true,
         },
         {
@@ -159,7 +161,11 @@ const ClientDetailsPage: React.FC = () => {
                         <BarChart2 className="h-4 w-4" />
                         Analytics
                     </Button>
-                    <Button variant="outline" className="flex items-center gap-2">
+                    <Button
+                        variant="outline"
+                        className="flex items-center gap-2"
+                        onClick={() => setShowZoomDialog(true)}
+                    >
                         <Video className="h-4 w-4" />
                         Zoom Session
                     </Button>
@@ -183,7 +189,7 @@ const ClientDetailsPage: React.FC = () => {
                         <Plus className="h-4 w-4 text-gray-500" />
                     </Button>
                 </div>
-                
+
             </div>
             {/* Main Tabs */}
             <Tabs defaultValue="activity" className="w-full" value={activeTab} onValueChange={setActiveTab}>
@@ -213,23 +219,37 @@ const ClientDetailsPage: React.FC = () => {
                                                 <div className="flex items-center gap-2">
                                                     <span className="font-medium">{s.date}</span>
                                                     <SessionTypeLabel type={s.type} />
+                                                    {s.status === 'In Progress' && (
+                                                        <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs">
+                                                            In Progress
+                                                        </span>
+                                                    )}
                                                 </div>
                                                 <span className="text-sm text-gray-600">{s.duration}</span>
-                                                <div className="flex gap-2 mt-1">
-                                                    {s.topics.map((topic, idx) => (
-                                                        <span
-                                                            key={idx}
-                                                            className="px-2 py-1 bg-gray-100 text-gray-700 rounded-full text-xs"
-                                                        >
-                                                            {topic}
-                                                        </span>
-                                                    ))}
-                                                </div>
+                                                {s.topics.length > 0 && (
+                                                    <div className="flex gap-2 mt-1">
+                                                        {s.topics.map((topic, idx) => (
+                                                            <span
+                                                                key={idx}
+                                                                className="px-2 py-1 bg-gray-100 text-gray-700 rounded-full text-xs"
+                                                            >
+                                                                {topic}
+                                                            </span>
+                                                        ))}
+                                                    </div>
+                                                )}
                                             </div>
                                         </div>
-                                        <Button variant="ghost" size="sm">View Details</Button>
+                                        <Button
+                                            variant="ghost"
+                                            size="sm"
+                                            disabled={s.status === 'In Progress'}
+                                        >
+                                            {s.status === 'In Progress' ? 'Processing...' : 'View Details'}
+                                        </Button>
                                     </div>
                                 ))}
+
                             </div>
                         </CardContent>
                     </Card>
@@ -441,6 +461,13 @@ const ClientDetailsPage: React.FC = () => {
                     </div>
                 </TabsContent>
             </Tabs>
+
+
+            <ZoomSessionDialog
+                isOpen={showZoomDialog}
+                onClose={() => setShowZoomDialog(false)}
+                onStartSession={()=>{}}
+            />
 
             {/* Progress Note Detail Dialog */}
             <Dialog open={showProgressNoteDetail} onOpenChange={setShowProgressNoteDetail}>
