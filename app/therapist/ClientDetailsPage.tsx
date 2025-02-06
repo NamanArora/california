@@ -466,7 +466,7 @@ const ClientDetailsPage: React.FC = () => {
             <ZoomSessionDialog
                 isOpen={showZoomDialog}
                 onClose={() => setShowZoomDialog(false)}
-                onStartSession={()=>{}}
+                onStartSession={()=>{return new Promise(()=> {})}}
             />
 
             {/* Progress Note Detail Dialog */}
