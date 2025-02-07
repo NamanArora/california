@@ -24,6 +24,7 @@ import MyClientsPage from './MyClientsPage';
 import TeamsTab from './TeamsTab';
 import AnalyticsTab from './AnalyticsTab';
 import ClientDetailsPage from './ClientDetailsPage';
+import SettingsPage from './Settings';
 
 // Sample data for demonstration
 const performanceData = [
@@ -285,7 +286,7 @@ const Dashboard = () => {
             case 'analytics':
                 return <AnalyticsTab />;
             case 'settings':
-                return <div className="p-6"><h2 className="text-2xl font-bold">Settings</h2></div>;
+                return <SettingsPage />
             case 'help':
                 return <div className="p-6"><h2 className="text-2xl font-bold">Help & Support</h2></div>;
             case 'clientDetails':
