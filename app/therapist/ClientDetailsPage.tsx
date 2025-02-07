@@ -61,6 +61,7 @@ import {
 import RealtimeSession from './RealtimeSession';
 import { useRouter } from 'next/navigation';
 import ZoomSessionDialog from './ZoomSessionDialog';
+import ProgressNoteModal from './ProgressNoteModal';
 
 const ClientDetailsPage: React.FC = () => {
     const [activeTab, setActiveTab] = useState('activity');
@@ -68,8 +69,9 @@ const ClientDetailsPage: React.FC = () => {
     const [showRecordingDialog, setShowRecordingDialog] = useState(false);
     const [isSessionModalOpen, setIsSessionModalOpen] = useState(false);
     const [selectedRecording, setSelectedRecording] = useState<Session | null>(null);
-    const [showProgressNoteDetail, setShowProgressNoteDetail] = useState(false);
     const [showZoomDialog, setShowZoomDialog] = useState(false);
+    const [showProgressNoteDialog, setShowProgressNoteDialog] = useState(false);
+    const [isProgressNoteEditable, setIsProgressNoteEditable] = useState(true);
     const router = useRouter();
 
     const client: Client = {
@@ -108,6 +110,11 @@ const ClientDetailsPage: React.FC = () => {
                 {type === "zoom" ? "Zoom Session" : "In-person Session"}
             </span>
         );
+    };
+
+    const handleOpenProgressNote = (editable: boolean) => {
+        setIsProgressNoteEditable(editable);
+        setShowProgressNoteDialog(true);
     };
 
     const sessions: Session[] = [
@@ -259,7 +266,7 @@ const ClientDetailsPage: React.FC = () => {
                 <TabsContent value="progress" className="space-y-4">
                     <div className="flex justify-between items-center">
                         <h2 className="text-lg font-semibold">Progress Notes</h2>
-                        <Button onClick={() => setShowNoteDialog(true)}>
+                        <Button onClick={() => handleOpenProgressNote(true)}>
                             <Plus className="h-4 w-4 mr-2" />
                             New Note
                         </Button>
@@ -270,7 +277,7 @@ const ClientDetailsPage: React.FC = () => {
                             <Card
                                 key={i}
                                 className="cursor-pointer hover:shadow-md transition-shadow"
-                                onClick={() => setShowProgressNoteDetail(true)}
+                                onClick={() => handleOpenProgressNote(false)}
                             >
                                 <CardContent className="pt-6">
                                     <div className="flex items-center gap-2 mb-2">
@@ -462,29 +469,19 @@ const ClientDetailsPage: React.FC = () => {
                 </TabsContent>
             </Tabs>
 
+            <ProgressNoteModal
+                isOpen={showProgressNoteDialog}
+                onClose={() => setShowProgressNoteDialog(false)}
+                editable={isProgressNoteEditable}
+                sessionDate={isProgressNoteEditable ? undefined : "January 25, 2024"} // Example date for existing note
+            />
 
             <ZoomSessionDialog
                 isOpen={showZoomDialog}
                 onClose={() => setShowZoomDialog(false)}
-                onStartSession={()=>{return new Promise(()=> {})}}
+                onStartSession={() => { return new Promise(() => { }) }}
             />
 
-            {/* Progress Note Detail Dialog */}
-            <Dialog open={showProgressNoteDetail} onOpenChange={setShowProgressNoteDetail}>
-                <DialogContent>
-                    <DialogHeader>
-                        <DialogTitle>Progress Note Details</DialogTitle>
-                    </DialogHeader>
-                    <div className="mt-4 space-y-4">
-                        <p className="text-gray-600">
-                            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
-                        </p>
-                        <p className="text-gray-600">
-                            Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-                        </p>
-                    </div>
-                </DialogContent>
-            </Dialog>
 
             {/* Recording Dialog */}
             <Dialog open={showRecordingDialog} onOpenChange={setShowRecordingDialog}>
