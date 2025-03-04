@@ -1,6 +1,6 @@
 "use client"
 import React, { useState } from 'react';
-import { 
+import {
   Activity,
   ArrowDown,
   ArrowUp,
@@ -42,6 +42,9 @@ import {
   TabsList,
   TabsTrigger,
 } from "@/components/ui/tabs";
+import RequestsTable from './RequestsTable';
+import { useMockRealtimeRequests } from './useRealtimeRequests';
+import RequestDetailsModal from './RequestDetailsModal';
 
 // Dummy data for traffic metrics
 const trafficData = Array.from({ length: 24 }, (_, i) => ({
@@ -51,14 +54,6 @@ const trafficData = Array.from({ length: 24 }, (_, i) => ({
   latency: Math.floor(Math.random() * 100) + 50
 }));
 
-// Dummy data for security checks
-const securityChecks = Array.from({ length: 24 }, (_, i) => ({
-  time: `${i}:00`,
-  promptInjection: Math.floor(Math.random() * 100),
-  piiDetection: Math.floor(Math.random() * 80),
-  contentFilter: Math.floor(Math.random() * 60),
-  dataLeakage: Math.floor(Math.random() * 40)
-}));
 
 // System health metrics
 const systemHealth = {
@@ -117,6 +112,16 @@ const quickStats = [
 
 const MonitoringPage = () => {
   const [timeRange, setTimeRange] = useState('24h');
+  const [selectedRequest, setSelectedRequest] = useState(null);
+  const [detailsOpen, setDetailsOpen] = useState(false);
+  
+  // Use mock data in development, switch to real implementation in production
+  const requests = useMockRealtimeRequests();
+
+  const handleRequestClick = (request) => {
+    setSelectedRequest(request);
+    setDetailsOpen(true);
+  };
 
   const getStatusColor = (value: number) => {
     if (value < 60) return 'text-green-500';
@@ -177,7 +182,7 @@ const MonitoringPage = () => {
       </div>
 
       {/* System Health */}
-      <Card>
+      {/* <Card>
         <CardHeader>
           <CardTitle>System Health</CardTitle>
           <CardDescription>Real-time system performance metrics</CardDescription>
@@ -192,7 +197,7 @@ const MonitoringPage = () => {
                 </span>
               </div>
               <div className="h-2 bg-secondary rounded-full">
-                <div 
+                <div
                   className={`h-2 rounded-full ${systemHealth.cpu < 60 ? 'bg-green-500' : systemHealth.cpu < 80 ? 'bg-yellow-500' : 'bg-red-500'}`}
                   style={{ width: `${systemHealth.cpu}%` }}
                 />
@@ -206,7 +211,7 @@ const MonitoringPage = () => {
                 </span>
               </div>
               <div className="h-2 bg-secondary rounded-full">
-                <div 
+                <div
                   className={`h-2 rounded-full ${systemHealth.memory < 60 ? 'bg-green-500' : systemHealth.memory < 80 ? 'bg-yellow-500' : 'bg-red-500'}`}
                   style={{ width: `${systemHealth.memory}%` }}
                 />
@@ -220,7 +225,7 @@ const MonitoringPage = () => {
                 </span>
               </div>
               <div className="h-2 bg-secondary rounded-full">
-                <div 
+                <div
                   className={`h-2 rounded-full ${systemHealth.storage < 60 ? 'bg-green-500' : systemHealth.storage < 80 ? 'bg-yellow-500' : 'bg-red-500'}`}
                   style={{ width: `${systemHealth.storage}%` }}
                 />
@@ -234,7 +239,7 @@ const MonitoringPage = () => {
                 </span>
               </div>
               <div className="h-2 bg-secondary rounded-full">
-                <div 
+                <div
                   className={`h-2 rounded-full ${systemHealth.network < 60 ? 'bg-green-500' : systemHealth.network < 80 ? 'bg-yellow-500' : 'bg-red-500'}`}
                   style={{ width: `${systemHealth.network}%` }}
                 />
@@ -242,10 +247,10 @@ const MonitoringPage = () => {
             </div>
           </div>
         </CardContent>
-      </Card>
+      </Card> */}
 
       {/* Traffic Overview */}
-      <Card>
+      {/* <Card>
         <CardHeader>
           <CardTitle>Traffic Overview</CardTitle>
           <CardDescription>Request volume and performance metrics</CardDescription>
@@ -259,82 +264,44 @@ const MonitoringPage = () => {
                 <YAxis />
                 <Tooltip />
                 <Legend />
-                <Line 
-                  type="monotone" 
-                  dataKey="requests" 
-                  stroke="#2563eb" 
+                <Line
+                  type="monotone"
+                  dataKey="requests"
+                  stroke="#2563eb"
                   name="Total Requests"
                 />
-                <Line 
-                  type="monotone" 
-                  dataKey="blocked" 
-                  stroke="#dc2626" 
+                <Line
+                  type="monotone"
+                  dataKey="blocked"
+                  stroke="#dc2626"
                   name="Blocked Requests"
                 />
-                <Line 
-                  type="monotone" 
-                  dataKey="latency" 
-                  stroke="#2dd4bf" 
+                <Line
+                  type="monotone"
+                  dataKey="latency"
+                  stroke="#2dd4bf"
                   name="Latency (ms)"
                 />
               </LineChart>
             </ResponsiveContainer>
           </div>
         </CardContent>
+      </Card> */}
+
+      
+
+      <Card>
+        <RequestsTable
+          requests={requests}
+          onRequestClick={handleRequestClick}
+        />
       </Card>
 
-      {/* Security Checks Overview */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Security Checks</CardTitle>
-          <CardDescription>Security check metrics and trends</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="h-[300px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={securityChecks}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="time" />
-                <YAxis />
-                <Tooltip />
-                <Legend />
-                <Area 
-                  type="monotone" 
-                  dataKey="promptInjection" 
-                  stackId="1"
-                  stroke="#2563eb" 
-                  fill="#2563eb" 
-                  name="Prompt Injection"
-                />
-                <Area 
-                  type="monotone" 
-                  dataKey="piiDetection" 
-                  stackId="1"
-                  stroke="#dc2626" 
-                  fill="#dc2626" 
-                  name="PII Detection"
-                />
-                <Area 
-                  type="monotone" 
-                  dataKey="contentFilter" 
-                  stackId="1"
-                  stroke="#2dd4bf" 
-                  fill="#2dd4bf" 
-                  name="Content Filter"
-                />
-                <Area 
-                  type="monotone" 
-                  dataKey="dataLeakage" 
-                  stackId="1"
-                  stroke="#eab308" 
-                  fill="#eab308" 
-                  name="Data Leakage"
-                />
-              </AreaChart>
-            </ResponsiveContainer>
-          </div>
-        </CardContent>
-      </Card>
+      <RequestDetailsModal
+        request={selectedRequest}
+        open={detailsOpen}
+        onOpenChange={setDetailsOpen}
+      />
     </div>
   );
 };

@@ -19,7 +19,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
+import { Area, AreaChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 
 // Stats data
 const stats = [
@@ -62,6 +62,16 @@ const recentAlerts = [
   { id: 5, type: 'Response Validation', severity: 'medium', time: '3 hours ago', status: 'resolved' }
 ];
 
+
+// Dummy data for security checks
+const securityChecks = Array.from({ length: 24 }, (_, i) => ({
+  time: `${i}:00`,
+  promptInjection: Math.floor(Math.random() * 100),
+  piiDetection: Math.floor(Math.random() * 80),
+  contentFilter: Math.floor(Math.random() * 60),
+  dataLeakage: Math.floor(Math.random() * 40)
+}));
+
 // Traffic data for the chart
 const trafficData = Array.from({ length: 24 }, (_, i) => ({
   hour: `${String(i).padStart(2, '0')}:00`,
@@ -95,6 +105,59 @@ const DashboardHome = () => {
           </Card>
         ))}
       </div>
+
+      {/* Security Checks Overview */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Security Checks</CardTitle>
+          <CardDescription>Security check metrics and trends</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="h-[300px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={securityChecks}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="time" />
+                <YAxis />
+                <Tooltip />
+                <Legend />
+                <Area
+                  type="monotone"
+                  dataKey="promptInjection"
+                  stackId="1"
+                  stroke="#2563eb"
+                  fill="#2563eb"
+                  name="Prompt Injection"
+                />
+                <Area
+                  type="monotone"
+                  dataKey="piiDetection"
+                  stackId="1"
+                  stroke="#dc2626"
+                  fill="#dc2626"
+                  name="PII Detection"
+                />
+                <Area
+                  type="monotone"
+                  dataKey="contentFilter"
+                  stackId="1"
+                  stroke="#2dd4bf"
+                  fill="#2dd4bf"
+                  name="Content Filter"
+                />
+                <Area
+                  type="monotone"
+                  dataKey="dataLeakage"
+                  stackId="1"
+                  stroke="#eab308"
+                  fill="#eab308"
+                  name="Data Leakage"
+                />
+              </AreaChart>
+            </ResponsiveContainer>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Traffic Overview Chart */}
       <Card>

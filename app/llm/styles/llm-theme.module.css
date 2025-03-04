@@ -1,5 +1,5 @@
 /* styles/llm-theme.module.css */
-.llmWrapper.dark {
+.llmWrapper {
     --background: 0 0% 100%;
     --foreground: 224 71.4% 4.1%;
     --card: 0 0% 100%;
@@ -27,7 +27,7 @@
     --chart-5: 27 87% 67%;
   }
   
-  .llmWrapper {
+  .llmWrapper.dark {
     --background: 224 71.4% 4.1%;
     --foreground: 210 20% 98%;
     --card: 224 71.4% 4.1%;

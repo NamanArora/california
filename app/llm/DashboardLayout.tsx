@@ -50,9 +50,9 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
   const navItems = [
     { id: 'dashboard', label: 'Dashboard', icon: Home, path: '/llm' },
     { id: 'security', label: 'Security Rules', icon: Shield, path: '/llm/security' },
-    { id: 'monitoring', label: 'Monitoring', icon: Activity, path: '/llm/monitoring' },
+    { id: 'monitoring', label: 'Realtime Monitoring', icon: Activity, path: '/llm/monitoring' },
     { id: 'incidents', label: 'Incidents', icon: AlertTriangle, path: '/llm/incidents' },
-    { id: 'analytics', label: 'Analytics', icon: BarChart2, path: '/llm/analytics' },
+    // { id: 'analytics', label: 'Analytics', icon: BarChart2, path: '/llm/analytics' },
     { id: 'settings', label: 'Settings', icon: Settings, path: '/llm/settings' }
   ];
 

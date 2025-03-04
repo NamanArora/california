@@ -48,6 +48,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import SecurityRuleBuilder from './SecurityRuleBuilder';
 
 // TypeScript interfaces
 interface SecurityRule {
@@ -180,137 +181,8 @@ const SecurityRulesPage: React.FC = () => {
         </div>
         <AddRuleWizard onRuleAdd={handleAddRule} />
       </div>
+      <SecurityRuleBuilder />
 
-      <div className="flex items-center justify-between">
-        <div className="flex gap-2">
-          <Input
-            placeholder="Search rules..."
-            className="w-[300px]"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
-          <Select value={statusFilter} onValueChange={(value) => setStatusFilter(value as StatusFilter)}>
-            <SelectTrigger className="w-[180px] bg-background text-foreground border-border">
-              <SelectValue placeholder="Filter by status" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Status</SelectItem>
-              <SelectItem value="active">Active</SelectItem>
-              <SelectItem value="inactive">Inactive</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-      </div>
-
-      <Tabs defaultValue="all" className="space-y-4" onValueChange={(value) => setActiveTab(value as TabValue)}>
-        <TabsList>
-          <TabsTrigger value="all">All Rules</TabsTrigger>
-          <TabsTrigger value="input">Input Security</TabsTrigger>
-          <TabsTrigger value="output">Output Security</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="all" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Security Rules Overview</CardTitle>
-              <CardDescription>
-                View and manage all security rules across input and output processing
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="w-[250px]">Rule Name</TableHead>
-                    <TableHead>Type</TableHead>
-                    <TableHead>Category</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Sensitivity</TableHead>
-                    <TableHead>Action</TableHead>
-                    <TableHead>Last Modified</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredRules.map((rule) => (
-                    <TableRow key={rule.id}>
-                      <TableCell className="font-medium">{rule.name}</TableCell>
-                      <TableCell>
-                        <Badge variant="outline">
-                          {rule.type}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>{rule.category}</TableCell>
-                      <TableCell>
-                        <div className="flex items-center space-x-2">
-                          {getStatusIcon(rule.status)}
-                          <span className={rule.status === 'active' ? 'text-green-500' : 'text-gray-500'}>
-                            {rule.status}
-                          </span>
-                        </div>
-                      </TableCell>
-                      <TableCell>{getSeverityBadge(rule.sensitivity)}</TableCell>
-                      <TableCell>
-                        <Badge variant="outline">
-                          {rule.action}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>{rule.lastModified}</TableCell>
-                      <TableCell className="text-right">
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" className="h-8 w-8 p-0">
-                              <MoreHorizontal className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                            <DropdownMenuItem>Edit Rule</DropdownMenuItem>
-                            <DropdownMenuItem>View History</DropdownMenuItem>
-                            <DropdownMenuItem>Test Rule</DropdownMenuItem>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem className="text-red-600">
-                              Delete Rule
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="input" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Input Security Rules</CardTitle>
-              <CardDescription>
-                Configure rules for securing input prompts and data
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              {/* Same table as above but filtered for input rules */}
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="output" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Output Security Rules</CardTitle>
-              <CardDescription>
-                Configure rules for securing LLM responses and output data
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              {/* Same table as above but filtered for output rules */}
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
     </div>
   );
 };
