@@ -253,6 +253,80 @@ const TherapistPage = () => {
         ],
         "healthSpecialty": ["Anxiety", "Cultural Identity", "Trauma", "EMDR"]
       }
+    },
+    {
+      id: 2,
+      name: "Meera Bhadra, AMFT",
+      title: "Associate Marriage and Family Therapist",
+      image: "https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e",
+      bio: "Meera Bhadra is an Associate Marriage and Family Therapist (AMFT) and an experienced psychology professor with over six years of teaching at community colleges, including Chabot College and Ohlone College. Her multicultural perspective, enriched by her previous work as a Clinical Psychologist in India, allows her to develop and deliver personalized individual and group therapy sessions for children, adolescents, and young adults. Meera is passionate about empowering others and is committed to fostering a safe and empathetic environment where clients can build resilience, enhance self-awareness, and achieve meaningful personal growth.",
+      languages: ["English", "Hindi"],
+      education: [
+        "MS, Marriage and Family Therapy, California State University (2021-2023)",
+        "Master's degree, Clinical Psychology, SNDT Women's University (2009-2011)",
+      ],
+      approaches: [
+        "Teen",
+        "Family",
+        "Couple"
+      ],
+      testimonials: [],
+      schema: {
+        "@context": "https://schema.org",
+        "@type": "Person",
+        "name": "Meera Bhadra",
+        "jobTitle": "Associate Marriage and Family Therapist",
+        "description": "Specializes in personalized individual and group therapy sessions for children, adolescents, and young adults",
+        "knowsLanguage": ["English", "Hindi"],
+        "alumniOf": [
+          {
+            "@type": "CollegeOrUniversity",
+            "name": "California State University"
+          },
+          {
+            "@type": "CollegeOrUniversity",
+            "name": "SNDT Women's University"
+          }
+        ],
+        "healthSpecialty": ["Teen", "Family", "Couple"]
+      }
+    },
+    {
+      id: 3,
+      name: "Geeta Magesh, Clinical Psychologist",
+      title: "Clinical Psychologist",
+      image: "https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e",
+      bio: "Geeta Magesh is a licensed Clinical Psychologist registered with the Rehabilitation Council of India (RCI). She holds a gold medal in Clinical Psychology from Osmania University and has been honored with the Vocational Service Award by the Rotary Club for her contributions to mental health. With over a decade of experience, Ms. Magesh specializes in conducting comprehensive psychological assessments and providing evidence-based psychotherapies to individuals, couples, children, and families facing a wide range of mental health challenges. Her person-centered approach emphasizes integrated psychotherapies aimed at enhancing resilience, emotion regulation, effective communication, stress management, and overall well-being.",
+      languages: ["English", "Hindi", "Telegu"],
+      education: [
+        "Doctoral Researcher, BITS Pilani (2023-Present)",
+        "M.Phil, Clinical Psychologist, Osmania University (2019)",
+      ],
+      approaches: [
+        "Anxiety",
+        "Couple",
+        "Trauma",
+      ],
+      testimonials: [],
+      schema: {
+        "@context": "https://schema.org",
+        "@type": "Person",
+        "name": "Geeta Magesh",
+        "jobTitle": "Clinical Psychologist",
+        "description": "Specializes in evidence-based psychotherapies to individuals, couples, children, and families facing a wide range of mental health challenges",
+        "knowsLanguage": ["English", "Hindi", "Telegu"],
+        "alumniOf": [
+          {
+            "@type": "CollegeOrUniversity",
+            "name": "BITS Pilani"
+          },
+          {
+            "@type": "CollegeOrUniversity",
+            "name": "Osmania University"
+          }
+        ],
+        "healthSpecialty": ["Anxiety", "Couple", "Trauma"]
+      }
     }
   ];
 
