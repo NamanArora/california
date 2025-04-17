@@ -288,7 +288,7 @@ const InsuranceCardUpload: React.FC = () => {
               </Button>
               <Button 
                 onClick={nextStep}
-                className="bg-purple-600 hover:bg-purple-700"
+                className="bg-orange-600 hover:bg-orange-700"
               >
                 Next Step
               </Button>
@@ -332,7 +332,7 @@ const InsuranceCardUpload: React.FC = () => {
               </Button>
               <Button 
                 onClick={nextStep}
-                className="bg-purple-600 hover:bg-purple-700"
+                className="bg-orange-600 hover:bg-orange-700"
               >
                 Next Step
               </Button>
@@ -434,7 +434,7 @@ const InsuranceCardUpload: React.FC = () => {
               </Button>
               <Button 
                 onClick={handleSubmit}
-                className="bg-purple-600 hover:bg-purple-700"
+                className="bg-orange-600 hover:bg-orange-700"
                 disabled={isUploading}
               >
                 {isUploading ? (
@@ -463,31 +463,31 @@ const InsuranceCardUpload: React.FC = () => {
       <div className="w-full max-w-2xl mx-auto">
         {/* Logo and Branding */}
         <div className="flex items-center mb-8">
-          <div className="w-10 h-10 bg-purple-600 rounded-lg flex items-center justify-center mr-3">
+          <div className="w-10 h-10 bg-orange-600 rounded-lg flex items-center justify-center mr-3">
             <Shield className="w-6 h-6 text-white" />
           </div>
-          <h1 className="text-2xl font-bold text-purple-800">TheraWin Health</h1>
+          <h1 className="text-2xl font-bold text-orange-800">TheraWin Health</h1>
         </div>
         
         {/* Progress Steps */}
         <div className="mb-6">
           <div className="flex items-center justify-between w-full max-w-lg mx-auto">
             <div className="flex flex-col items-center">
-              <div className={`w-8 h-8 rounded-full flex items-center justify-center ${step >= 1 ? 'bg-purple-600 text-white' : 'bg-gray-200 text-gray-500'}`}>
+              <div className={`w-8 h-8 rounded-full flex items-center justify-center ${step >= 1 ? 'bg-orange-600 text-white' : 'bg-gray-200 text-gray-500'}`}>
                 1
               </div>
               <span className="text-xs mt-1">Front of Card</span>
             </div>
-            <div className={`flex-1 h-1 mx-2 ${step >= 2 ? 'bg-purple-600' : 'bg-gray-200'}`}></div>
+            <div className={`flex-1 h-1 mx-2 ${step >= 2 ? 'bg-orange-600' : 'bg-gray-200'}`}></div>
             <div className="flex flex-col items-center">
-              <div className={`w-8 h-8 rounded-full flex items-center justify-center ${step >= 2 ? 'bg-purple-600 text-white' : 'bg-gray-200 text-gray-500'}`}>
+              <div className={`w-8 h-8 rounded-full flex items-center justify-center ${step >= 2 ? 'bg-orange-600 text-white' : 'bg-gray-200 text-gray-500'}`}>
                 2
               </div>
               <span className="text-xs mt-1">Back of Card</span>
             </div>
-            <div className={`flex-1 h-1 mx-2 ${step >= 3 ? 'bg-purple-600' : 'bg-gray-200'}`}></div>
+            <div className={`flex-1 h-1 mx-2 ${step >= 3 ? 'bg-orange-600' : 'bg-gray-200'}`}></div>
             <div className="flex flex-col items-center">
-              <div className={`w-8 h-8 rounded-full flex items-center justify-center ${step >= 3 ? 'bg-purple-600 text-white' : 'bg-gray-200 text-gray-500'}`}>
+              <div className={`w-8 h-8 rounded-full flex items-center justify-center ${step >= 3 ? 'bg-orange-600 text-white' : 'bg-gray-200 text-gray-500'}`}>
                 3
               </div>
               <span className="text-xs mt-1">Contact Info</span>

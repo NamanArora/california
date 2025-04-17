@@ -17,10 +17,10 @@ const InsuranceUploadThankYou = () => {
       <div className="w-full max-w-2xl mx-auto">
         {/* Logo and Branding */}
         <div className="flex items-center mb-8">
-          <div className="w-10 h-10 bg-purple-600 rounded-lg flex items-center justify-center mr-3">
+          <div className="w-10 h-10 bg-orange-600 rounded-lg flex items-center justify-center mr-3">
             <Shield className="w-6 h-6 text-white" />
           </div>
-          <h1 className="text-2xl font-bold text-purple-800">TheraWin Health</h1>
+          <h1 className="text-2xl font-bold text-orange-800">TheraWin Health</h1>
         </div>
         
         <Card className="border-0 shadow-lg mb-8">
@@ -37,12 +37,12 @@ const InsuranceUploadThankYou = () => {
           </CardHeader>
           
           <CardContent className="px-8 pb-8">
-            <div className="bg-purple-50 border border-purple-100 rounded-lg p-4 mb-6">
-              <h3 className="font-medium text-purple-800 mb-3">What Happens Next?</h3>
+            <div className="bg-orange-50 border border-orange-100 rounded-lg p-4 mb-6">
+              <h3 className="font-medium text-orange-800 mb-3">What Happens Next?</h3>
               <ul className="space-y-4">
                 <li className="flex">
-                  <div className="bg-purple-100 p-2 rounded-full mr-3 flex-shrink-0">
-                    <User className="w-5 h-5 text-purple-600" />
+                  <div className="bg-orange-100 p-2 rounded-full mr-3 flex-shrink-0">
+                    <User className="w-5 h-5 text-orange-600" />
                   </div>
                   <div>
                     <p className="text-sm text-gray-700">
@@ -51,8 +51,8 @@ const InsuranceUploadThankYou = () => {
                   </div>
                 </li>
                 <li className="flex">
-                  <div className="bg-purple-100 p-2 rounded-full mr-3 flex-shrink-0">
-                    <Clock className="w-5 h-5 text-purple-600" />
+                  <div className="bg-orange-100 p-2 rounded-full mr-3 flex-shrink-0">
+                    <Clock className="w-5 h-5 text-orange-600" />
                   </div>
                   <div>
                     <p className="text-sm text-gray-700">
@@ -61,8 +61,8 @@ const InsuranceUploadThankYou = () => {
                   </div>
                 </li>
                 <li className="flex">
-                  <div className="bg-purple-100 p-2 rounded-full mr-3 flex-shrink-0">
-                    <Calendar className="w-5 h-5 text-purple-600" />
+                  <div className="bg-orange-100 p-2 rounded-full mr-3 flex-shrink-0">
+                    <Calendar className="w-5 h-5 text-orange-600" />
                   </div>
                   <div>
                     <p className="text-sm text-gray-700">
@@ -85,7 +85,7 @@ const InsuranceUploadThankYou = () => {
             <div className="space-y-4">
               <Button 
                 onClick={() => window.location.href = '/'}
-                className="w-full bg-purple-600 hover:bg-purple-700"
+                className="w-full bg-orange-600 hover:bg-orange-700"
               >
                 Return to Homepage
               </Button>
@@ -93,7 +93,7 @@ const InsuranceUploadThankYou = () => {
               <Button
                 onClick={() => window.location.href = '/appointments'}
                 variant="outline"
-                className="w-full border-purple-200 text-purple-600 hover:bg-purple-50"
+                className="w-full border-orange-200 text-orange-600 hover:bg-orange-50"
               >
                 Schedule a Session
                 <ChevronRight className="ml-2 h-4 w-4" />
