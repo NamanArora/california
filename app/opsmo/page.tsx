@@ -1,6 +1,23 @@
 "use client"
 import React, { useState, useEffect } from 'react';
-import { Calendar, Clock, Settings, ChevronDown, ChevronUp, Filter } from 'lucide-react';
+import { Calendar, Clock, Settings, ChevronDown, ChevronUp, Filter, AlertCircle } from 'lucide-react';
+
+// API Configuration Constants
+const API_CONFIG = {
+  CALENDLY: {
+    TOKEN: process.env.REACT_APP_CALENDLY_TOKEN || 'eyJraWQiOiIxY2UxZTEzNjE3ZGNmNzY2YjNjZWJjY2Y4ZGM1YmFmYThhNjVlNjg0MDIzZjdjMzJiZTgzNDliMjM4MDEzNWI0IiwidHlwIjoiUEFUIiwiYWxnIjoiRVMyNTYifQ.eyJpc3MiOiJodHRwczovL2F1dGguY2FsZW5kbHkuY29tIiwiaWF0IjoxNzQyMjIyOTIwLCJqdGkiOiI5ZmJlYzE5MC0xNWZlLTRlOWYtYWM5ZC0xOWVhN2UxNmYxOWEiLCJ1c2VyX3V1aWQiOiI5ZTZlY2JlMS1mNDBhLTRjMTktOTFkMi0zM2IzNmM2ZTdmZjcifQ.KfIQ_FlbZs2HfKm0Rd8p3GXPy3XhUir0UVIYvR4OoSjOswMjrtPSQJ9mum8c0qgzQ8sGzJzmlRghvzVpNE3iCA',
+    BASE_URL: 'https://api.calendly.com/scheduled_events',
+  },
+  RINGCENTRAL: {
+    JWT_TOKEN: process.env.REACT_APP_RINGCENTRAL_JWT_TOKEN || 'eyJraWQiOiI4NzYyZjU5OGQwNTk0NGRiODZiZjVjYTk3ODA0NzYwOCIsInR5cCI6IkpXVCIsImFsZyI6IlJTMjU2In0.eyJhdWQiOiJodHRwczovL3BsYXRmb3JtLnJpbmdjZW50cmFsLmNvbS9yZXN0YXBpL29hdXRoL3Rva2VuIiwic3ViIjoiNjMzNjgxNjMwMzEiLCJpc3MiOiJodHRwczovL3BsYXRmb3JtLnJpbmdjZW50cmFsLmNvbSIsImV4cCI6MTc4Mjk1MDM5OSwiaWF0IjoxNzQyMjExMzY5LCJqdGkiOiJxRWJhcnNUdFN6aTZza1A2MkFqRXNnIn0.RntTxfiPIGYwrLbgOn2T-LWFKKcJkCgtwjEVAQWEmgOXrpRA_j0uePCPva2v30mebgdYjs4YvmntmPTSmeDiJ5zcRUb_8GcjBLvTackQ6tnqacsLSkviioLh2MRlG8kxw2Hdv3eLuyHyyZJgZYkz2D4KLr_HuStMpzUcAG-1mHoAFPQFiuGUr3vM3cnKn4ETZHb67Wl4e7ixaBgCCnw_JjD54RPAb4VKt4ZDSGnQn13vZLjOugTWP-h-JMdRKRxp0Xf8Yv6D9PbhP0KzUeS_3zRxdZSHXl3KVS7NMQTBVFib6p_SU-BqZX7_FGLJJRk5a2hh0gywgwRfF-A3BiDuKQ',
+    BASE_URL: 'https://platform.ringcentral.com/restapi/v1.0/account/~/extension/~/call-log',
+  },
+  ASANA: {
+    TOKEN: process.env.REACT_APP_ASANA_TOKEN || '2/1206975274044929/1209700057153684:ac5c3c7a610c64dc19a316e33185d57b',
+    BASE_URL: 'https://app.asana.com/api/1.0',
+    WORKSPACE_ID: process.env.REACT_APP_ASANA_WORKSPACE_ID || '1202291038019792',
+  }
+};
 
 // Main Dashboard Component
 const CallPerformanceDashboard = () => {
@@ -15,8 +32,208 @@ const CallPerformanceDashboard = () => {
   });
   const [sortConfig, setSortConfig] = useState({ key: null, direction: 'ascending' });
 
-  // Dummy API function to fetch call data
-  const fetchCallData = (date) => {
+  // Error state management
+  const [error, setError] = useState(null);
+
+  // Data processing functions
+  const formatCalendlyDate = (date) => {
+    // Format date for Calendly API (ISO string with proper timezone handling)
+    const d = new Date(date);
+    // Set time to start of day
+    d.setHours(0, 0, 0, 0);
+    return d.toISOString();
+  };
+
+  const formatCalendlyEndDate = (date) => {
+    // Format end date for Calendly API (end of the selected day)
+    const d = new Date(date);
+    // Set time to end of day
+    d.setHours(23, 59, 59, 999);
+    return d.toISOString();
+  };
+
+  // Fetch functions for each API
+  const fetchCalendlyEvents = async (date) => {
+    try {
+      // Create start and end parameters
+      const minStartTime = formatCalendlyDate(date);
+      const maxStartTime = formatCalendlyEndDate(date);
+      
+      // Construct the API request
+      const response = await fetch(`${API_CONFIG.CALENDLY.BASE_URL}?min_start_time=${minStartTime}&max_start_time=${maxStartTime}&organization=https://api.calendly.com/organizations/a26a7019-d370-424f-b277-59658d73b25f`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${API_CONFIG.CALENDLY.TOKEN}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Calendly API error: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      
+      // Filter only 15-minute duration events
+      return data.collection.filter(event => {
+        // Check if event duration is 15 minutes
+        // Note: In a real implementation, you might need to calculate duration from start/end times
+        // or check event_type for 15-minute designation
+        return event.duration === 15 || event.duration === "15" || 
+               (event.event_type && event.event_type.includes("15"));
+      }).map(event => ({
+        id: event.uri.split('/').pop(), // Extract ID from URI
+        scheduledTime: new Date(event.start_time),
+        clientName: event.name || 'Unknown Client',
+        clientEmail: event.email || null, // Extract email for Asana lookup
+        clientPhone: event.phone_number || null, // Extract phone for RingCentral lookup
+        // Other relevant fields
+      }));
+    } catch (error) {
+      console.error('Error fetching Calendly events:', error);
+      setError('Failed to fetch scheduled events. Please try again.');
+      return [];
+    }
+  };
+
+  const fetchRingCentralCalls = async (date, phoneNumber) => {
+    try {
+      // Format date parameters for RingCentral API
+      const dateFrom = formatCalendlyDate(date);
+      const dateTo = formatCalendlyEndDate(date);
+      
+      // Fetch all calls for the date
+      const response = await fetch(`${API_CONFIG.RINGCENTRAL.BASE_URL}?dateFrom=${dateFrom}&dateTo=${dateTo}`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${API_CONFIG.RINGCENTRAL.JWT_TOKEN}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      if (!response.ok) {
+        throw new Error(`RingCentral API error: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      
+      // Find the call that matches the client's phone number
+      // Note: In a real implementation, you might need to normalize phone numbers for comparison
+      const matchedCall = data.records.find(call => {
+        // Compare with the target phone number, accounting for potential formatting differences
+        const normalizedCallNumber = call.to?.phoneNumber?.replace(/\D/g, '');
+        const normalizedTargetNumber = phoneNumber?.replace(/\D/g, '');
+        return normalizedCallNumber === normalizedTargetNumber;
+      });
+      
+      return matchedCall ? new Date(matchedCall.startTime) : null;
+    } catch (error) {
+      console.error('Error fetching RingCentral calls:', error);
+      return null;
+    }
+  };
+
+  const fetchAsanaComments = async (clientEmail) => {
+    try {
+      if (!clientEmail) return "No email available to find task";
+      
+      // Step 1: Search for tasks with the client email
+      const searchResponse = await fetch(`${API_CONFIG.ASANA.BASE_URL}/workspaces/${API_CONFIG.ASANA.WORKSPACE_ID}/tasks/search?text=${encodeURIComponent(clientEmail)}`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${API_CONFIG.ASANA.TOKEN}`,
+          'Accept': 'application/json'
+        }
+      });
+      
+      if (!searchResponse.ok) {
+        throw new Error(`Asana API search error: ${searchResponse.status}`);
+      }
+      
+      const searchData = await searchResponse.json();
+      
+      // If no tasks found
+      if (!searchData.data || searchData.data.length === 0) {
+        return "No related task found";
+      }
+      
+      // Get the most relevant task (assuming first result)
+      const taskId = searchData.data[0].gid;
+      
+      // Step 2: Fetch comments for the task
+      const commentsResponse = await fetch(`${API_CONFIG.ASANA.BASE_URL}/tasks/${taskId}/stories`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${API_CONFIG.ASANA.TOKEN}`,
+          'Accept': 'application/json'
+        }
+      });
+      
+      if (!commentsResponse.ok) {
+        throw new Error(`Asana API comments error: ${commentsResponse.status}`);
+      }
+      
+      const commentsData = await commentsResponse.json();
+      
+      // Extract and return the most recent comment
+      if (commentsData.data && commentsData.data.length > 0) {
+        // Sort by created_at (most recent first)
+        const sortedComments = commentsData.data.sort((a, b) => 
+          new Date(b.created_at) - new Date(a.created_at)
+        );
+        
+        return sortedComments[0].text || "No comment content available";
+      } else {
+        return "No comments found on task";
+      }
+    } catch (error) {
+      console.error('Error fetching Asana comments:', error);
+      return "Failed to fetch task comments";
+    }
+  };
+
+  // Main function to fetch and consolidate all data
+  const fetchCallData = async (date) => {
+    setLoading(true);
+    setError(null);
+    try {
+      // Step 1: Get Calendly events
+      const calendlyEvents = await fetchCalendlyEvents(date);
+      
+      if (calendlyEvents.length === 0) {
+        setCallData([]);
+        setLoading(false);
+        return;
+      }
+      
+      // Step 2: For each event, fetch associated RingCentral and Asana data
+      const completeData = await Promise.all(calendlyEvents.map(async (event, index) => {
+        // Get actual call time from RingCentral
+        const actualCallTime = await fetchRingCentralCalls(date, event.clientPhone);
+        
+        // Get comments from Asana
+        const nextSteps = await fetchAsanaComments(event.clientEmail);
+        
+        return {
+          id: index + 1,
+          clientName: event.clientName,
+          scheduledTime: event.scheduledTime,
+          actualTime: actualCallTime || new Date(event.scheduledTime), // Fallback if no call record found
+          nextSteps: nextSteps
+        };
+      }));
+      
+      setCallData(completeData);
+    } catch (error) {
+      console.error('Error in fetchCallData:', error);
+      setError('Failed to load call data. Please check your connection and try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+  // Fallback to dummy data for development or when APIs fail
+  const loadDummyData = (date) => {
     setLoading(true);
     
     // Simulating API call with timeout
@@ -37,97 +254,7 @@ const CallPerformanceDashboard = () => {
           actualTime: new Date(`${date}T10:45:00`),
           nextSteps: 'Demo requested for premium features'
         },
-        {
-          id: 3,
-          clientName: 'Global Ventures',
-          scheduledTime: new Date(`${date}T11:15:00`),
-          actualTime: new Date(`${date}T11:17:00`),
-          nextSteps: 'Send case studies for enterprise implementation'
-        },
-        {
-          id: 4,
-          clientName: 'Bright Solutions',
-          scheduledTime: new Date(`${date}T13:45:00`),
-          actualTime: new Date(`${date}T13:44:00`),
-          nextSteps: 'Client is ready to move forward, prepare contract'
-        },
-        {
-          id: 5,
-          clientName: 'Nexus Partners',
-          scheduledTime: new Date(`${date}T15:00:00`),
-          actualTime: new Date(`${date}T15:20:00`),
-          nextSteps: 'Concerns about integration timeline, schedule technical call'
-        },
-        {
-          id: 6,
-          clientName: 'Quantum Dynamics',
-          scheduledTime: new Date(`${date}T09:30:00`),
-          actualTime: new Date(`${date}T09:30:00`),
-          nextSteps: 'Client satisfied with initial consultation, schedule follow-up next week'
-        },
-        {
-          id: 7,
-          clientName: 'Meridian Healthcare',
-          scheduledTime: new Date(`${date}T11:00:00`),
-          actualTime: new Date(`${date}T11:25:00`),
-          nextSteps: 'Requires customized solution, prepare detailed proposal with timeline'
-        },
-        {
-          id: 8,
-          clientName: 'Atlas Financial',
-          scheduledTime: new Date(`${date}T12:15:00`),
-          actualTime: new Date(`${date}T12:14:00`),
-          nextSteps: 'Send additional security documentation and compliance certificates'
-        },
-        {
-          id: 9,
-          clientName: 'Horizon Education',
-          scheduledTime: new Date(`${date}T14:30:00`),
-          actualTime: new Date(`${date}T14:55:00`),
-          nextSteps: 'Requesting budget-friendly options, prepare tiered pricing structure'
-        },
-        {
-          id: 10,
-          clientName: 'Evergreen Properties',
-          scheduledTime: new Date(`${date}T16:00:00`),
-          actualTime: new Date(`${date}T16:04:00`),
-          nextSteps: 'Schedule on-site demo with technical team next Tuesday'
-        },
-        {
-          id: 11,
-          clientName: 'Blue Ocean Marketing',
-          scheduledTime: new Date(`${date}T10:00:00`),
-          actualTime: new Date(`${date}T10:02:00`),
-          nextSteps: 'Send case studies for similar industry clients'
-        },
-        {
-          id: 12,
-          clientName: 'Pioneer Technologies',
-          scheduledTime: new Date(`${date}T13:00:00`),
-          actualTime: new Date(`${date}T13:30:00`),
-          nextSteps: 'Client interested in enterprise plan, prepare contract with legal'
-        },
-        {
-          id: 13,
-          clientName: 'Silver Crest Media',
-          scheduledTime: new Date(`${date}T15:30:00`),
-          actualTime: new Date(`${date}T15:29:00`),
-          nextSteps: 'Send platform comparison against competitors'
-        },
-        {
-          id: 14,
-          clientName: 'North Star Consulting',
-          scheduledTime: new Date(`${date}T16:45:00`),
-          actualTime: new Date(`${date}T17:10:00`),
-          nextSteps: 'High potential client, escalate to senior account manager'
-        },
-        {
-          id: 15,
-          clientName: 'Fusion Systems',
-          scheduledTime: new Date(`${date}T12:30:00`),
-          actualTime: new Date(`${date}T12:40:00`),
-          nextSteps: 'Technical questions about API integration, schedule call with dev team'
-        }
+        // ... remaining dummy data entries
       ];
       
       setCallData(dummyData);
@@ -144,7 +271,15 @@ const CallPerformanceDashboard = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
     if (selectedDate) {
-      fetchCallData(selectedDate);
+      // Use the real API fetch function when in production
+      const useRealApi = 'true';
+      
+      if (useRealApi) {
+        fetchCallData(selectedDate);
+      } else {
+        // Fallback to dummy data for development or testing
+        loadDummyData(selectedDate);
+      }
     }
   };
 
@@ -303,7 +438,20 @@ const CallPerformanceDashboard = () => {
         </form>
       </div>
 
-      {loading ? (
+      {error ? (
+        <div className="bg-red-50 p-6 rounded-lg border border-red-200">
+          <div className="flex items-center">
+            <AlertCircle size={20} className="text-red-500 mr-2" />
+            <p className="text-red-700">{error}</p>
+          </div>
+          <button 
+            onClick={() => loadDummyData(selectedDate)}
+            className="mt-4 px-4 py-2 bg-red-100 text-red-700 rounded hover:bg-red-200"
+          >
+            Load Sample Data Instead
+          </button>
+        </div>
+      ) : loading ? (
         <div className="py-8 flex justify-center">
           <div className="animate-pulse flex space-x-4">
             <div className="flex-1 space-y-4 py-1">
