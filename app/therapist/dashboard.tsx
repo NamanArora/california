@@ -25,6 +25,7 @@ import TeamsTab from './TeamsTab';
 import AnalyticsTab from './AnalyticsTab';
 import ClientDetailsPage from './ClientDetailsPage';
 import SettingsPage from './Settings';
+import AppointmentsPage from './Events';
 
 // Sample data for demonstration
 const performanceData = [
@@ -263,6 +264,7 @@ const Dashboard = () => {
 
     const mainTabs = [
         { id: 'dashboard', name: 'Dashboard', icon: Home },
+        { id: 'events', name: 'Events', icon: Home },
         { id: 'clients', name: 'My Clients', icon: UserCircle },
         { id: 'team', name: 'Team', icon: Users },
         { id: 'analytics', name: 'Analytics', icon: BarChart },
@@ -279,6 +281,8 @@ const Dashboard = () => {
         switch (activeTab) {
             case 'dashboard':
                 return <DashboardContent />;
+            case 'events':
+                return <AppointmentsPage />;
             case 'clients':
                 return <MyClientsPage />;
             case 'team':

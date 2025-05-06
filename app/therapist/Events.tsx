@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 // Using date-fns for robust date handling
-import { format as formatDateFns, isToday, startOfDay, parseISO, isSameDay } from 'date-fns'; // Added isSameDay
+import { format as formatDateFns, isToday, startOfDay, parseISO, isSameDay, startOfYesterday } from 'date-fns'; // Added startOfYesterday
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -37,7 +37,8 @@ import {
   CalendarCheck, // For Go to Today button
   Clipboard, // Used for 'Add Disposition' state
   MessageSquare, // Icon representing notes added this session
-  Bell // Icon for Notifications
+  Bell, // Icon for Notifications
+  ListFilter // Icon for showing calendar view again
 } from 'lucide-react';
 
 // --- Utility Functions ---
@@ -47,8 +48,9 @@ function convertToPST(utcTimeString) {
       return "Invalid Date";
   }
   const date = new Date(utcTimeString);
+  // Use a specific timezone for consistency, e.g., PST
   return date.toLocaleTimeString('en-US', {
-    timeZone: 'America/Los_Angeles', // Example Timezone
+    timeZone: 'America/Los_Angeles',
     hour: 'numeric',
     minute: '2-digit',
     hour12: true
@@ -64,19 +66,18 @@ function formatTimeRange(startTime, endTime) {
   return `${start} - ${end}`;
 }
 
+// Updated to use actual current time for status
 function getAppointmentStatus(startTime, endTime) {
   try {
-    const now = new Date(); // Current time in user's browser
+    const now = new Date(); // Use actual current time
     const start = new Date(startTime);
     const end = new Date(endTime);
 
     if (isNaN(start.getTime()) || isNaN(end.getTime())) return "invalid";
 
-    // For sample data consistency, we compare against the *sample* 'now'
-    const contextNow = new Date(Date.UTC(2025, 3, 30, 14, 0, 0)); // Use this for status in relation to sample data context
-    if (contextNow >= start && contextNow <= end) return "current";
-    if (contextNow < start) return "upcoming";
-    return "past"; // contextNow > end
+    if (now >= start && now <= end) return "current";
+    if (now < start) return "upcoming";
+    return "past"; // now > end
 
   } catch (error) {
     console.error("Error getting appointment status:", error);
@@ -87,7 +88,15 @@ function getAppointmentStatus(startTime, endTime) {
 
 function sortAppointmentsByTime(appointments) {
   const validAppointments = appointments.filter(a => a.startTime && !isNaN(new Date(a.startTime).getTime()));
-  return [...validAppointments].sort((a, b) => new Date(a.startTime) - new Date(b.startTime));
+  // Sort primarily by date, then by time
+  return [...validAppointments].sort((a, b) => {
+       const dateA = startOfDay(new Date(a.startTime));
+       const dateB = startOfDay(new Date(b.startTime));
+       if (dateA < dateB) return -1;
+       if (dateA > dateB) return 1;
+       // If dates are the same, sort by start time
+       return new Date(a.startTime) - new Date(b.startTime);
+   });
 }
 
 function formatNoteTimestamp(timestamp) {
@@ -95,6 +104,7 @@ function formatNoteTimestamp(timestamp) {
     try {
         const date = typeof timestamp === 'string' ? parseISO(timestamp) : new Date(timestamp);
         if (isNaN(date.getTime())) return 'Invalid Date';
+        // Use a specific timezone for consistency
         return formatDateFns(date, 'PPpp', { timeZone: 'America/Los_Angeles' });
     } catch (e) {
         console.error("Error formatting timestamp:", e);
@@ -105,10 +115,10 @@ function formatNoteTimestamp(timestamp) {
 // --- Main Component ---
 const TherapistAppointmentsPage = () => {
   // --- State Variables ---
-  // Use the sample data's 'today' as the initial selected date for demo consistency
+  // Define 'today' based on sample data context for consistency in demo logic
   const contextTodayDate = useMemo(() => startOfDay(new Date(Date.UTC(2025, 3, 30, 0, 0, 0))), []);
-  const [selectedDate, setSelectedDate] = useState(contextTodayDate); // Default to sample data's 'today'
 
+  const [selectedDate, setSelectedDate] = useState(null); // Start with no date selected initially
   const [appointments, setAppointments] = useState([]);
   const [dispositionDialogOpen, setDispositionDialogOpen] = useState(false);
   const [patientDetailsDialogOpen, setPatientDetailsDialogOpen] = useState(false);
@@ -118,6 +128,7 @@ const TherapistAppointmentsPage = () => {
   const [therapistNoteText, setTherapistNoteText] = useState("");
   const [isCopied, setIsCopied] = useState(null);
   const [therapistEmail] = useState('geeta@therawin.health');
+  const [showingPendingOnly, setShowingPendingOnly] = useState(false); // State for notification view
 
   // --- Sample Data Setup Effect ---
   useEffect(() => {
@@ -131,43 +142,31 @@ const TherapistAppointmentsPage = () => {
     const contextBaseTime = new Date(Date.UTC(2025, 3, 30, 14, 0, 0));
 
     setAppointments([
-      // --- Today's Appointments (Apr 30, 2025) ---
-      // Past, Disposition Added
-      { id: "T1", patientName: "David Wilson", startTime: createDate(contextBaseTime, 0, 13, 0), endTime: createDate(contextBaseTime, 0, 13, 50), sessionType: "zoom", zoomLink: "https://zoom.us/j/T1", disposition: "Completed", notes: "Patient reported improved sleep patterns. Follow up in 2 weeks.", phone: null, therapistNotes: [
-          { text: "David seems to be responding well to the CBT techniques discussed last week. Mentioned difficulty with applying them during high-stress work situations. Plan to explore workplace triggers next session.", author: "geeta@therawin.health", timestamp: createDate(contextBaseTime, -7, 14, 0) }
-      ] },
-      // Current (at 14:00 UTC), No Disposition Yet << THIS ONE SHOULD BE PENDING LATER
-      { id: "T2", patientName: "Emily Rodriguez", startTime: createDate(contextBaseTime, 0, 13, 45), endTime: createDate(contextBaseTime, 0, 14, 35), sessionType: "phone", zoomLink: null, disposition: null, notes: "", phone: "555-111-2222", therapistNotes: [] },
-       // Past, No Disposition Yet (For Notification Demo) << THIS ONE IS PENDING
-      { id: "T0_PENDING", patientName: "Charlie Brown", startTime: createDate(contextBaseTime, 0, 11, 0), endTime: createDate(contextBaseTime, 0, 11, 50), sessionType: "zoom", zoomLink: "https://zoom.us/j/T0", disposition: null, notes: "", phone: null, therapistNotes: [] },
-      // Upcoming
-      { id: "T3", patientName: "Michael Chen", startTime: createDate(contextBaseTime, 0, 15, 0), endTime: createDate(contextBaseTime, 0, 15, 50), sessionType: "zoom", zoomLink: "https://zoom.us/j/T3", disposition: null, notes: "", phone: null, therapistNotes: [] },
-      { id: "T4", patientName: "Sarah Johnson", startTime: createDate(contextBaseTime, 0, 16, 0), endTime: createDate(contextBaseTime, 0, 16, 50), sessionType: "zoom", zoomLink: "https://zoom.us/j/T4", disposition: null, notes: "", phone: null, therapistNotes: [] },
-      { id: "T5", patientName: "Robert Kim", startTime: createDate(contextBaseTime, 0, 17, 30), endTime: createDate(contextBaseTime, 0, 18, 20), sessionType: "phone", zoomLink: null, disposition: null, notes: "", phone: "555-333-4444", therapistNotes: [] },
-      { id: "T6", patientName: "Aisha Patel", startTime: createDate(contextBaseTime, 0, 19, 0), endTime: createDate(contextBaseTime, 0, 19, 50), sessionType: "zoom", zoomLink: "https://zoom.us/j/T6", disposition: null, notes: "", phone: null, therapistNotes: [] },
-      { id: "T7", patientName: "James Wilson", startTime: createDate(contextBaseTime, 0, 21, 0), endTime: createDate(contextBaseTime, 0, 21, 50), sessionType: "phone", zoomLink: null, disposition: null, notes: "", phone: "555-555-6666", therapistNotes: [] },
-      // --- Yesterday's Appointment (Apr 29, 2025) ---
-      { id: "Y1", patientName: "Yesterday Session", startTime: createDate(contextBaseTime, -1, 17, 0), endTime: createDate(contextBaseTime, -1, 17, 50), sessionType: "zoom", zoomLink: "https://zoom.us/j/Y1", disposition: "Completed", notes: "Session finished.", phone: null, therapistNotes: [
-          { text: "Good progress on identifying negative thought patterns.", author: "geeta@therawin.health", timestamp: createDate(contextBaseTime, -1, 18, 0) }
-      ] },
-       // Yesterday, No Disposition Yet (To show notification only counts for 'today')
-      { id: "Y_PENDING", patientName: "Lucy Van Pelt", startTime: createDate(contextBaseTime, -1, 10, 0), endTime: createDate(contextBaseTime, -1, 10, 50), sessionType: "phone", zoomLink: null, disposition: null, notes: "", phone: "555-000-1111", therapistNotes: [] },
-      // --- Tomorrow's Appointments (May 1, 2025) ---
+      // --- Today's Appointments (Apr 30, 2025 in sample context) ---
+      { id: "T1", patientName: "David Wilson", startTime: createDate(contextBaseTime, 0, 13, 0), endTime: createDate(contextBaseTime, 0, 13, 50), sessionType: "zoom", zoomLink: "https://zoom.us/j/T1", disposition: "Completed", notes: "Patient reported improved sleep patterns. Follow up in 2 weeks.", phone: null, therapistNotes: [ { text: "David seems to be responding well...", author: "geeta@therawin.health", timestamp: createDate(contextBaseTime, -7, 14, 0) } ] },
+      { id: "T2", patientName: "Emily Rodriguez", startTime: createDate(contextBaseTime, 0, 13, 45), endTime: createDate(contextBaseTime, 0, 14, 35), sessionType: "phone", zoomLink: null, disposition: null, notes: "", phone: "555-111-2222", therapistNotes: [] }, // Ends after contextBaseTime, not pending yet
+      { id: "T0_PENDING", patientName: "Charlie Brown", startTime: createDate(contextBaseTime, 0, 11, 0), endTime: createDate(contextBaseTime, 0, 11, 50), sessionType: "zoom", zoomLink: "https://zoom.us/j/T0", disposition: null, notes: "", phone: null, therapistNotes: [] }, // Past 'today', pending
+      { id: "T3", patientName: "Michael Chen", startTime: createDate(contextBaseTime, 0, 15, 0), endTime: createDate(contextBaseTime, 0, 15, 50), sessionType: "zoom", zoomLink: "https://zoom.us/j/T3", disposition: null, notes: "", phone: null, therapistNotes: [] }, // Upcoming 'today'
+      // --- Yesterday's Appointment (Apr 29, 2025 in sample context) ---
+      { id: "Y1", patientName: "Yesterday Session", startTime: createDate(contextBaseTime, -1, 17, 0), endTime: createDate(contextBaseTime, -1, 17, 50), sessionType: "zoom", zoomLink: "https://zoom.us/j/Y1", disposition: "Completed", notes: "Session finished.", phone: null, therapistNotes: [ { text: "Good progress...", author: "geeta@therawin.health", timestamp: createDate(contextBaseTime, -1, 18, 0) } ] },
+      { id: "Y_PENDING", patientName: "Lucy Van Pelt", startTime: createDate(contextBaseTime, -1, 10, 0), endTime: createDate(contextBaseTime, -1, 10, 50), sessionType: "phone", zoomLink: null, disposition: null, notes: "", phone: "555-000-1111", therapistNotes: [] }, // Yesterday, pending
+      // --- Day Before Yesterday (Apr 28, 2025 in sample context) ---
+      { id: "YY_PENDING", patientName: "Linus Van Pelt", startTime: createDate(contextBaseTime, -2, 14, 0), endTime: createDate(contextBaseTime, -2, 14, 50), sessionType: "zoom", zoomLink: null, disposition: null, notes: "", phone: null, therapistNotes: [] }, // Also pending
+      // --- Tomorrow's Appointments (May 1, 2025 in sample context) ---
       { id: "Tm1", patientName: "Tomorrow Morning", startTime: createDate(contextBaseTime, 1, 16, 30), endTime: createDate(contextBaseTime, 1, 17, 20), sessionType: "phone", zoomLink: null, disposition: null, notes: "", phone: "555-888-9999", therapistNotes: [] },
-      { id: "Tm2", patientName: "Tomorrow Afternoon", startTime: createDate(contextBaseTime, 1, 20, 0), endTime: createDate(contextBaseTime, 1, 20, 50), sessionType: "zoom", zoomLink: "https://zoom.us/j/Tm2", disposition: null, notes: "", phone: null, therapistNotes: [] },
-      // Add another appointment for David Wilson to test note aggregation
-      { id: "Y2", patientName: "David Wilson", startTime: createDate(contextBaseTime, -8, 15, 0), endTime: createDate(contextBaseTime, -8, 15, 50), sessionType: "zoom", zoomLink: "https://zoom.us/j/Y2", disposition: "Completed", notes: "Previous session notes.", phone: null, therapistNotes: [
-          { text: "Initial intake session. Discussed goals and history.", author: "geeta@therawin.health", timestamp: createDate(contextBaseTime, -8, 16, 0) }
-      ] },
+       // --- Much Older Appointment ---
+      { id: "Y2", patientName: "David Wilson", startTime: createDate(contextBaseTime, -8, 15, 0), endTime: createDate(contextBaseTime, -8, 15, 50), sessionType: "zoom", zoomLink: "https://zoom.us/j/Y2", disposition: "Completed", notes: "Previous session notes.", phone: null, therapistNotes: [ { text: "Initial intake session...", author: "geeta@therawin.health", timestamp: createDate(contextBaseTime, -8, 16, 0) } ] },
     ]);
-  }, [therapistEmail, contextTodayDate]); // Add contextTodayDate dependency
+    // Set initial date selection after data load (e.g., to sample today)
+    setSelectedDate(contextTodayDate);
+  }, [therapistEmail, contextTodayDate]);
 
   // --- Event Handlers ---
   const handleDispositionClick = (appointment) => {
     setSelectedAppointment(appointment);
     setDisposition(appointment.disposition || "");
     setDispositionNotes(appointment.notes || "");
-    setTherapistNoteText(""); // Clear previous therapist note text
+    setTherapistNoteText("");
     setDispositionDialogOpen(true);
   };
 
@@ -176,8 +175,16 @@ const TherapistAppointmentsPage = () => {
     setPatientDetailsDialogOpen(true);
   };
 
+  // Modified Save Handler: Saves disposition (if selected) AND/OR therapist note (if entered)
   const handleSaveDisposition = () => {
     if (!selectedAppointment) return;
+
+    // Only proceed if there's something to save (disposition or note)
+    if (!disposition && !therapistNoteText.trim()) {
+        // Maybe show a small error/feedback message? For now, just close.
+        setDispositionDialogOpen(false);
+        return;
+    }
 
     const newTherapistNote = therapistNoteText.trim()
       ? { text: therapistNoteText.trim(), author: therapistEmail, timestamp: new Date().toISOString() } : null;
@@ -185,10 +192,14 @@ const TherapistAppointmentsPage = () => {
     setAppointments(prev => prev.map(appt => {
       if (appt.id === selectedAppointment.id) {
         const existingNotes = appt.therapistNotes || [];
+        // Save disposition if provided, otherwise keep existing or null
+        const finalDisposition = disposition ? disposition : appt.disposition;
         return {
           ...appt,
-          disposition: disposition || null,
-          notes: dispositionNotes,
+          // Update disposition only if it was actually selected in the dialog
+          disposition: disposition || appt.disposition || null, // Keep existing if new one wasn't selected
+          notes: dispositionNotes, // Always update disposition notes field
+          // Append new therapist note if it exists
           therapistNotes: newTherapistNote ? [...existingNotes, newTherapistNote] : existingNotes,
         };
       }
@@ -204,56 +215,70 @@ const TherapistAppointmentsPage = () => {
 
   const handleCopyPhone = (phone, appointmentId) => { navigator.clipboard.writeText(phone); setIsCopied(appointmentId); setTimeout(() => setIsCopied(null), 2000); };
   const handleJoinZoomClick = (appointment) => { if (appointment.zoomLink) { window.open(appointment.zoomLink, '_blank'); handleDispositionClick(appointment); } };
-  const handleGoToToday = () => { setSelectedDate(contextTodayDate); }; // Go to sample data's today
 
-  // Notification Click Handler
-  const handleNotificationClick = () => {
-      // In this demo, the notification always refers to the sample data's "today"
+  // Go To Today: Resets view to calendar mode and selects context today
+  const handleGoToToday = () => {
+      setShowingPendingOnly(false); // Exit pending view
       setSelectedDate(contextTodayDate);
-      // In a real app, you might navigate to the specific date the notification pertains to.
   };
 
+  // Select Date from Calendar: Resets view to calendar mode
+  const handleDateSelect = (date) => {
+      setShowingPendingOnly(false); // Exit pending view
+      setSelectedDate(date);
+  };
+
+  // Notification Click Handler: Clears date and shows only pending items
+  const handleNotificationClick = () => {
+      setSelectedDate(null); // Deselect date
+      setShowingPendingOnly(true); // Enter pending view mode
+  };
+
+  // Handler to exit pending view and go back to calendar view (e.g., showing today)
+  const handleShowCalendarView = () => {
+      setShowingPendingOnly(false);
+      setSelectedDate(contextTodayDate); // Default back to today or last selected? Let's use today.
+  }
 
   // --- Derived State & Logic ---
-  const displayedAppointments = useMemo(() => {
-    if (!selectedDate) return [];
-    const targetDateStart = startOfDay(selectedDate);
 
-    const filtered = appointments.filter(a =>
-        a.startTime &&
-        !isNaN(new Date(a.startTime).getTime()) &&
-        isSameDay(new Date(a.startTime), targetDateStart) // Use isSameDay for accurate comparison
-    );
-
-    // Keep the sorting, but display all appointments for the selected day
-    return sortAppointmentsByTime(filtered);
-
-  }, [appointments, selectedDate]);
-
-  const upcomingAppointmentId = useMemo(() => {
-      // Determine 'now' relative to the sample data for accurate 'next up' status
-      const contextNow = new Date(Date.UTC(2025, 3, 30, 14, 0, 0));
-      // Filter displayed appointments for the ones actually starting after 'now'
-      const futureAppointmentsOnSelectedDay = displayedAppointments.filter(a => new Date(a.startTime) > contextNow);
-      // The first one in the sorted list is the 'next up'
-      return futureAppointmentsOnSelectedDay[0]?.id;
-  }, [displayedAppointments]);
-
-
-  // Calculate Pending Dispositions for 'Today' (relative to sample data context)
-  const pendingDispositionsTodayCount = useMemo(() => {
-      const contextNow = new Date(Date.UTC(2025, 3, 30, 14, 0, 0)); // Sample 'Now'
-      const todayStart = contextTodayDate; // Sample 'Today'
+  // Calculate Missed Dispositions (Ended before Sample Data's 'Today', no disposition)
+  const missedDispositionsCount = useMemo(() => {
+      // Use start of the sample data's 'today' as the cutoff
+      const cutoffTime = contextTodayDate;
 
       return appointments.filter(appt => {
-          const apptStartTime = new Date(appt.startTime);
           const apptEndTime = new Date(appt.endTime);
-          // Check if appointment is on 'today' and ended before 'now' and has no disposition
-          return isSameDay(apptStartTime, todayStart) && // Is it today?
-                 apptEndTime < contextNow &&              // Has it ended?
-                 !appt.disposition;                       // Is disposition missing?
+          // Check if appointment ended *before* the start of 'today' and has no disposition
+          return apptEndTime < cutoffTime && !appt.disposition;
       }).length;
   }, [appointments, contextTodayDate]);
+
+
+  // Filter appointments based on selectedDate OR show only pending ones
+  const displayedAppointments = useMemo(() => {
+    if (showingPendingOnly) {
+        // Filter for all appointments ended before 'today' (sample context) without disposition
+        const cutoffTime = contextTodayDate;
+        const pending = appointments.filter(appt => {
+             const apptEndTime = new Date(appt.endTime);
+             return apptEndTime < cutoffTime && !appt.disposition;
+         });
+         return sortAppointmentsByTime(pending); // Sort pending ones by date/time
+    } else if (selectedDate) {
+        // Filter for the selected date
+        const targetDateStart = startOfDay(selectedDate);
+        const filtered = appointments.filter(a =>
+            a.startTime &&
+            !isNaN(new Date(a.startTime).getTime()) &&
+            isSameDay(new Date(a.startTime), targetDateStart)
+        );
+        return sortAppointmentsByTime(filtered); // Sort appointments for that day
+    } else {
+        // No date selected and not in pending view - show nothing or a default message?
+        return []; // Show empty list if no date is selected
+    }
+  }, [appointments, selectedDate, showingPendingOnly, contextTodayDate]);
 
 
   // Function to get all therapist notes for a specific patient
@@ -268,30 +293,32 @@ const TherapistAppointmentsPage = () => {
 
   // --- Render Appointment Card ---
   const renderAppointmentCard = (appointment) => {
+    // Use actual current time to determine status for display purposes
     const status = getAppointmentStatus(appointment.startTime, appointment.endTime);
     const isCurrent = status === "current";
-    const isUpcomingNext = status === "upcoming" && appointment.id === upcomingAppointmentId;
+    const isUpcoming = status === "upcoming";
     const isPast = status === "past";
-    const isOtherUpcoming = status === "upcoming" && !isUpcomingNext;
 
-    const dispositionExists = !!appointment.disposition; // Check if disposition is set
+    const dispositionExists = !!appointment.disposition;
 
-    // Styling (mostly unchanged, status still used for highlighting)
+    // Card Styling based on status (e.g., highlight current)
     let cardClasses = "bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200 overflow-hidden";
     let timeBoxClasses = "p-4 md:w-56 flex flex-col justify-center";
     let indicatorBorderClass = "border-l-4";
 
-    if (isUpcomingNext || isCurrent) {
+    if (isCurrent) {
       cardClasses += ` ${indicatorBorderClass} border-blue-500`;
       timeBoxClasses += " bg-blue-50 text-blue-800";
     } else if (isPast) {
-      // Keep past appointments distinct but fully opaque now
       cardClasses += " bg-slate-50";
       timeBoxClasses += " bg-slate-100 text-slate-600";
-    } else {
+    } else { // Upcoming
       cardClasses += ` ${indicatorBorderClass} border-blue-200`;
       timeBoxClasses += " bg-blue-50 text-blue-700";
     }
+
+    // When showing pending items, add date context
+    const showDateInCard = showingPendingOnly;
 
     return (
       <Card key={appointment.id} className={cardClasses}>
@@ -299,26 +326,26 @@ const TherapistAppointmentsPage = () => {
           <div className="flex flex-col md:flex-row">
             {/* Time and Status Column */}
             <div className={timeBoxClasses}>
+                {/* Show Date if in Pending View */}
+                {showDateInCard && (
+                    <div className="text-xs text-slate-500 mb-1.5 font-medium">
+                        {formatDateFns(new Date(appointment.startTime), 'MMM d, yyyy')}
+                    </div>
+                )}
                <div className="mb-2">
                 {appointment.sessionType === "zoom" ? (
-                  <Badge variant="secondary" className={`text-xs px-2 py-0.5 font-medium ${
-                      isUpcomingNext || isCurrent ? 'bg-blue-100 text-blue-700' :
-                      isOtherUpcoming ? 'bg-blue-100 text-blue-700' :
-                      'bg-slate-200 text-slate-600' }`}>
+                  <Badge variant="secondary" className={`text-xs px-2 py-0.5 font-medium ${ isCurrent ? 'bg-blue-100 text-blue-700' : isPast ? 'bg-slate-200 text-slate-600' : 'bg-blue-100 text-blue-700' }`}>
                     <Video className="h-3 w-3 mr-1" /> Zoom
                   </Badge>
                 ) : (
-                  <Badge variant="secondary" className={`text-xs px-2 py-0.5 font-medium ${
-                      isUpcomingNext || isCurrent ? 'bg-blue-100 text-blue-700' :
-                      isOtherUpcoming ? 'bg-blue-100 text-blue-700' :
-                      'bg-slate-200 text-slate-600' }`}>
+                  <Badge variant="secondary" className={`text-xs px-2 py-0.5 font-medium ${ isCurrent ? 'bg-blue-100 text-blue-700' : isPast ? 'bg-slate-200 text-slate-600' : 'bg-blue-100 text-blue-700' }`}>
                     <Phone className="h-3 w-3 mr-1" /> Phone
                   </Badge>
                 )}
               </div>
               <div className="flex items-center mb-1.5">
                 <Clock className="h-4 w-4 mr-1.5 flex-shrink-0" />
-                <span className={`font-medium ${isCurrent || isUpcomingNext ? "text-base" : "text-sm"}`}>
+                <span className={`font-medium ${isCurrent ? "text-base" : "text-sm"}`}>
                   {formatTimeRange(appointment.startTime, appointment.endTime)}
                 </span>
               </div>
@@ -327,49 +354,25 @@ const TherapistAppointmentsPage = () => {
             {/* Patient Info and Actions Column */}
             <div className="flex-1 p-4">
               <div className="flex flex-col sm:flex-row sm:items-start justify-between mb-3">
-                 {/* Patient Name (No FileText Icon anymore) */}
                  <div className="flex items-center gap-2 mb-1 sm:mb-0">
-                    <h3 className={`text-lg font-semibold ${
-                        isUpcomingNext || isCurrent ? 'text-blue-800':
-                        isPast ? 'text-slate-700':
-                        'text-gray-800'
-                      }`}>{appointment.patientName}
+                    <h3 className={`text-lg font-semibold ${ isCurrent ? 'text-blue-800' : isPast ? 'text-slate-700' : 'text-gray-800' }`}>
+                        {appointment.patientName}
                     </h3>
                  </div>
-                {/* Action Buttons: Grouped, smaller size - ALWAYS ENABLED */}
+                {/* Action Buttons - ALWAYS ENABLED */}
                 <div className="flex flex-wrap gap-2 items-start">
                   {appointment.sessionType === "zoom" ? (
-                    <Button
-                      size="sm"
-                      className="bg-blue-600 hover:bg-blue-700 text-white transition-colors shadow-sm px-3"
-                      onClick={() => handleJoinZoomClick(appointment)}
-                      aria-label={`Join Zoom for ${appointment.patientName}`}
-                      // Removed disabled prop
-                    >
-                      <Video className="h-4 w-4 mr-1.5" /> Join
-                      <ExternalLink className="h-3 w-3 ml-1 opacity-70" />
+                    <Button size="sm" className="bg-blue-600 hover:bg-blue-700 text-white transition-colors shadow-sm px-3" onClick={() => handleJoinZoomClick(appointment)} aria-label={`Join Zoom for ${appointment.patientName}`}>
+                      <Video className="h-4 w-4 mr-1.5" /> Join <ExternalLink className="h-3 w-3 ml-1 opacity-70" />
                     </Button>
-                  ) : ( // Phone Session
+                  ) : (
                     <div className="flex items-center gap-2">
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className={`border-gray-300 text-gray-600 hover:bg-gray-100 transition-colors ${isCopied === appointment.id ? 'bg-blue-50 border-blue-200' : ''} px-3`}
-                        onClick={() => handleCopyPhone(appointment.phone, appointment.id)}
-                        aria-label={`Copy phone for ${appointment.patientName}`}
-                        // Removed disabled prop
-                      >
+                      <Button size="sm" variant="outline" className={`border-gray-300 text-gray-600 hover:bg-gray-100 transition-colors ${isCopied === appointment.id ? 'bg-blue-50 border-blue-200' : ''} px-3`} onClick={() => handleCopyPhone(appointment.phone, appointment.id)} aria-label={`Copy phone for ${appointment.patientName}`}>
                         {isCopied === appointment.id ? ( <CheckCircle className="h-4 w-4 text-blue-600" /> ) : ( <Copy className="h-4 w-4" /> )}
                         <span className="ml-1.5 text-xs font-mono">{appointment.phone || 'No Phone'}</span>
                       </Button>
-                      <Button
-                        size="sm"
-                        className="bg-blue-600 hover:bg-blue-700 text-white transition-colors shadow-sm px-3"
-                        aria-label={`Call ${appointment.patientName}`}
-                        onClick={() => { if(appointment.phone) window.location.href = `tel:${appointment.phone}`; }}
-                         // Removed disabled prop
-                      > <Phone className="h-4 w-4" />
-                        <span className="ml-1.5">Call</span>
+                      <Button size="sm" className="bg-blue-600 hover:bg-blue-700 text-white transition-colors shadow-sm px-3" aria-label={`Call ${appointment.patientName}`} onClick={() => { if(appointment.phone) window.location.href = `tel:${appointment.phone}`; }}>
+                        <Phone className="h-4 w-4" /> <span className="ml-1.5">Call</span>
                       </Button>
                     </div>
                   )}
@@ -378,37 +381,17 @@ const TherapistAppointmentsPage = () => {
 
               {/* Lower Action Buttons - ALWAYS ENABLED */}
               <div className="flex flex-wrap gap-2 mt-3 pt-3 border-t border-slate-100">
+                <Button size="sm" variant="ghost" className="text-slate-600 hover:text-slate-900 hover:bg-slate-100 px-3" onClick={() => handlePatientDetailsClick(appointment)} aria-label={`Details for ${appointment.patientName}`}>
+                   <User className="h-4 w-4 mr-1.5" /> Details
+                </Button>
                 <Button
                   size="sm"
-                  variant="ghost"
-                  className="text-slate-600 hover:text-slate-900 hover:bg-slate-100 px-3"
-                  onClick={() => handlePatientDetailsClick(appointment)}
-                  aria-label={`Details for ${appointment.patientName}`}
-                  // Removed disabled prop
-                > <User className="h-4 w-4 mr-1.5" /> Details </Button>
-
-                {/* Disposition Button: State changes based on dispositionExists */}
-                <Button
-                  size="sm"
-                  className={`px-3 flex items-center transition-colors ${
-                    dispositionExists
-                      ? 'bg-green-100 text-green-700 hover:bg-green-200 hover:text-green-800' // Green state
-                      : 'bg-indigo-100 text-indigo-700 hover:bg-indigo-200 hover:text-indigo-800' // Default state
-                  }`}
+                  className={`px-3 flex items-center transition-colors ${ dispositionExists ? 'bg-green-100 text-green-700 hover:bg-green-200 hover:text-green-800' : 'bg-indigo-100 text-indigo-700 hover:bg-indigo-200 hover:text-indigo-800' }`}
                   onClick={() => handleDispositionClick(appointment)}
-                  aria-label={`${dispositionExists ? 'View or Edit' : 'Add'} Disposition & Notes for ${appointment.patientName}`}
-                   // Removed disabled prop
-                >
-                    {dispositionExists ? (
-                        <CheckCircle className="h-4 w-4 mr-1.5 text-green-600" />
-                    ) : (
-                        <Clipboard className="h-4 w-4 mr-1.5" />
-                    )}
+                  aria-label={`${dispositionExists ? 'View or Edit' : 'Add'} Disposition & Notes for ${appointment.patientName}`}>
+                    {dispositionExists ? ( <CheckCircle className="h-4 w-4 mr-1.5 text-green-600" /> ) : ( <Clipboard className="h-4 w-4 mr-1.5" /> )}
                     {dispositionExists ? 'Disposition Added' : 'Add Disposition'}
-                    {/* Optional: Keep note indicator if useful */}
-                    {/* {appointment.therapistNotes?.length > 0 && <MessageSquare className="h-3 w-3 ml-1.5 text-indigo-400 opacity-70" title="Notes added this session"/> } */}
                  </Button>
-
               </div>
             </div>
           </div>
@@ -423,93 +406,94 @@ const TherapistAppointmentsPage = () => {
     <div className="min-h-screen bg-slate-50 p-4 md:p-6">
       <div className="max-w-6xl mx-auto">
          <header className="mb-6 bg-white p-4 rounded-lg shadow-sm border border-gray-100">
-           <div className="flex flex-col md:flex-row items-center justify-between gap-4"> {/* Increased gap */}
-            {/* Left Side: Title and Date */}
+           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+            {/* Left Side: Title and View Indicator */}
             <div className="flex-grow">
               <h1 className="text-2xl font-semibold text-gray-800">
-                  Hello Geet! Here's your schedule
+                  {showingPendingOnly ? "Missed Dispositions" : "Hello Geet! Here's your schedule"}
               </h1>
-              <p className="text-gray-600 mt-1">
-                  {/* Display selected date */}
-                  {selectedDate ? formatDateFns(selectedDate, 'MMMM d, yyyy') : ''}
-                  {/* Highlight if selected date is the sample 'today' */}
-                  {selectedDate && isSameDay(selectedDate, contextTodayDate) && <Badge variant="outline" className="ml-2 text-sm border-blue-200 text-blue-600 bg-blue-50">Today</Badge>}
-              </p>
+               {!showingPendingOnly && ( // Only show date subtitle in calendar view
+                  <p className="text-gray-600 mt-1">
+                      {selectedDate ? formatDateFns(selectedDate, 'MMMM d, yyyy') : 'No date selected'}
+                      {selectedDate && isSameDay(selectedDate, contextTodayDate) && <Badge variant="outline" className="ml-2 text-sm border-blue-200 text-blue-600 bg-blue-50">Today</Badge>}
+                  </p>
+               )}
+               {showingPendingOnly && (
+                   <p className="text-sm text-amber-700 mt-1">Showing all past appointments needing dispositions.</p>
+               )}
             </div>
 
-            {/* Right Side: Notifications and Date Picker */}
+            {/* Right Side: Controls (Contextual) */}
             <div className="flex items-center gap-3 flex-wrap justify-end">
-                 {/* Notification Area */}
-                 {pendingDispositionsTodayCount > 0 && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="text-amber-600 hover:bg-amber-100 hover:text-amber-700"
-                      onClick={handleNotificationClick}
-                      aria-label={`Go to today to address ${pendingDispositionsTodayCount} pending dispositions`}
-                      title={`Go to today (${formatDateFns(contextTodayDate, 'MMM d')})`}
-                    >
-                        <Bell className="h-4 w-4 mr-1.5 animate-pulse"/>
-                        {pendingDispositionsTodayCount} Pending Today
-                    </Button>
+                 {/* Show Notification OR "Show Calendar" Button */}
+                 {showingPendingOnly ? (
+                     <Button variant="outline" size="sm" className="text-blue-600 border-blue-300 hover:bg-blue-50" onClick={handleShowCalendarView}>
+                         <ListFilter className="h-4 w-4 mr-1.5"/> Show Calendar View
+                     </Button>
+                 ) : (
+                    <>
+                         {/* Notification Area (only in calendar view) */}
+                         {missedDispositionsCount > 0 && (
+                            <Button variant="ghost" size="sm" className="text-amber-600 hover:bg-amber-100 hover:text-amber-700" onClick={handleNotificationClick} aria-label={`View ${missedDispositionsCount} missed dispositions`} title={`View ${missedDispositionsCount} missed dispositions`}>
+                                <Bell className="h-4 w-4 mr-1.5 animate-pulse"/>
+                                Missed dispositions: {missedDispositionsCount}
+                            </Button>
+                         )}
+
+                         {/* Date Picker (only in calendar view) */}
+                         <Popover>
+                            <PopoverTrigger asChild>
+                              <Button size="sm" variant={"outline"} className={`w-[180px] sm:w-[240px] justify-start text-left font-normal text-sm border-gray-300 focus-visible:ring-blue-400 focus-visible:ring-offset-0 ${ !selectedDate && "text-muted-foreground" }`}>
+                                <CalendarIcon className="mr-2 h-4 w-4 text-blue-600" />
+                                {selectedDate ? formatDateFns(selectedDate, 'MMM d, yyyy') : <span>Select date</span>}
+                              </Button>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-auto p-0">
+                              <CalendarComponent mode="single" selected={selectedDate} onSelect={handleDateSelect} initialFocus />
+                            </PopoverContent>
+                          </Popover>
+
+                          {/* "Go to Today" Button (only in calendar view & if not today) */}
+                          {selectedDate && !isSameDay(selectedDate, contextTodayDate) && (
+                            <Button size="sm" variant="outline" onClick={handleGoToToday} aria-label="Go to today's date" className="text-sm border-gray-300 text-blue-600 hover:bg-blue-50">
+                                <CalendarCheck className="h-4 w-4 mr-1.5" /> Today
+                            </Button>
+                          )}
+                    </>
                  )}
-
-                 {/* Date Picker */}
-                 <Popover>
-                    <PopoverTrigger asChild>
-                      <Button
-                        size="sm"
-                        variant={"outline"}
-                        className={`w-[180px] sm:w-[240px] justify-start text-left font-normal text-sm border-gray-300 focus-visible:ring-blue-400 focus-visible:ring-offset-0 ${
-                          !selectedDate && "text-muted-foreground"
-                        }`}
-                      >
-                        <CalendarIcon className="mr-2 h-4 w-4 text-blue-600" />
-                        {selectedDate ? formatDateFns(selectedDate, 'MMM d, yyyy') : <span>Select date</span>}
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0">
-                      <CalendarComponent
-                         mode="single"
-                         selected={selectedDate}
-                         onSelect={setSelectedDate}
-                         initialFocus
-                         // Optionally disable future dates if needed
-                         // disabled={(date) => date > new Date()}
-                      />
-                    </PopoverContent>
-                  </Popover>
-
-                  {/* "Go to Today" Button - Show if selected date is NOT today */}
-                  {selectedDate && !isSameDay(selectedDate, contextTodayDate) && (
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={handleGoToToday}
-                      aria-label="Go to today's date"
-                      className="text-sm border-gray-300 text-blue-600 hover:bg-blue-50"
-                    > <CalendarCheck className="h-4 w-4 mr-1.5" /> Today </Button>
-                  )}
             </div>
           </div>
         </header>
 
         {/* Appointment List */}
-        {displayedAppointments.length === 0 ? (
-          <div className="bg-white rounded-lg p-8 text-center border border-gray-100 shadow-sm mt-6">
-            <Smile className="h-16 w-16 text-blue-300 mx-auto mb-4" />
-            <h3 className="text-xl font-medium text-gray-700 mb-2">
-                No appointments found for this date.
-            </h3>
-            <p className="text-base text-gray-500">
-                 Try selecting a different date or check back later.
-            </p>
-          </div>
-        ) : (
-          <div className="space-y-4">
-            {displayedAppointments.map(renderAppointmentCard)}
-          </div>
+        {displayedAppointments.length === 0 && !showingPendingOnly && selectedDate && ( // Show "No appointments" only in calendar view if a date IS selected
+            <div className="bg-white rounded-lg p-8 text-center border border-gray-100 shadow-sm mt-6">
+                <Smile className="h-16 w-16 text-blue-300 mx-auto mb-4" />
+                <h3 className="text-xl font-medium text-gray-700 mb-2">
+                    No appointments found for this date.
+                </h3>
+                <p className="text-base text-gray-500">
+                    Try selecting a different date.
+                </p>
+            </div>
         )}
+        {displayedAppointments.length === 0 && showingPendingOnly && ( // Show "All caught up" in pending view
+            <div className="bg-white rounded-lg p-8 text-center border border-gray-100 shadow-sm mt-6">
+                <CheckCircle className="h-16 w-16 text-green-400 mx-auto mb-4" />
+                <h3 className="text-xl font-medium text-gray-700 mb-2">
+                    All caught up!
+                </h3>
+                <p className="text-base text-gray-500">
+                    No past appointments are missing dispositions.
+                </p>
+            </div>
+        )}
+        {displayedAppointments.length > 0 && ( // Render list if there are items to display
+            <div className="space-y-4">
+                {displayedAppointments.map(renderAppointmentCard)}
+            </div>
+        )}
+
       </div>
 
       {/* --- Dialogs --- */}
@@ -522,16 +506,20 @@ const TherapistAppointmentsPage = () => {
             <DialogDescription className="text-sm text-gray-600"> For session with {selectedAppointment?.patientName} </DialogDescription>
           </DialogHeader>
           <div className="grid gap-6 py-4">
-            {/* Disposition Section (Mandatory) */}
+            {/* Disposition Section (Now Optional for Saving) */}
             <div className="space-y-1.5">
               <Label htmlFor="disposition" className="text-sm font-medium text-gray-700">
-                Disposition <span className="text-red-500">*</span>
+                Disposition
+                {/* Removed mandatory indicator visually, but handled in save logic */}
               </Label>
-              <Select value={disposition} onValueChange={setDisposition} required>
+              <Select value={disposition} onValueChange={setDisposition}>
                 <SelectTrigger id="disposition" className="text-sm focus:ring-blue-500">
-                  <SelectValue placeholder="Select disposition (mandatory)" />
+                  {/* Changed placeholder to reflect optional nature for saving notes */}
+                  <SelectValue placeholder="Select disposition (optional if adding note)" />
                 </SelectTrigger>
                 <SelectContent>
+                  {/* Added an empty value option to allow clearing */}
+                  <SelectItem value="no disposition" className="text-sm text-gray-500 italic">-- No Disposition --</SelectItem>
                   <SelectItem value="ringing and LVM" className="text-sm">Ringing and LVM</SelectItem>
                   <SelectItem value="FFS booked" className="text-sm">FFS Booked</SelectItem>
                   <SelectItem value="No show" className="text-sm">No Show</SelectItem>
@@ -551,10 +539,10 @@ const TherapistAppointmentsPage = () => {
                 className="min-h-[80px] text-sm focus:ring-blue-500 focus:border-blue-500"
               />
             </div>
-             {/* Therapist Confidential Notes Section (Optional) */}
+             {/* Therapist Confidential Notes Section */}
             <div className="space-y-1.5 border-t pt-4 mt-2 border-dashed border-slate-300">
               <Label htmlFor="therapist-notes" className="text-sm font-medium text-indigo-700 flex items-center gap-1.5">
-                 <FileText className="h-4 w-4"/> Confidential Therapist Note (Optional)
+                 <FileText className="h-4 w-4"/> Confidential Therapist Note
               </Label>
                <p className="text-xs text-slate-500">This note is confidential and linked to this session.</p>
               <Textarea
@@ -570,9 +558,10 @@ const TherapistAppointmentsPage = () => {
               size="sm"
               onClick={handleSaveDisposition}
               className="bg-blue-600 hover:bg-blue-700 text-white disabled:opacity-50"
-              disabled={!disposition} // Still disable save if mandatory disposition is missing
+              // Enable save if EITHER disposition is selected OR therapist note has text
+              disabled={!disposition && !therapistNoteText.trim()}
             >
-                Save Disposition & Notes
+                Save Changes
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -586,17 +575,12 @@ const TherapistAppointmentsPage = () => {
             <DialogDescription className="text-sm text-gray-600"> Information for {selectedAppointment?.patientName} </DialogDescription>
           </DialogHeader>
           <div className="space-y-5 py-4 max-h-[70vh] overflow-y-auto pr-2">
-            {/* Sample Case Description */}
-            <div>
-              <h3 className="text-sm font-medium text-gray-600 mb-1">Case Description</h3>
-              <p className="text-sm text-gray-700 p-2.5 bg-slate-100 rounded border border-slate-200">
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed vestibulum, justo at hendrerit semper... (Replace with actual data)
-              </p>
-            </div>
+            {/* Removed Sample Case Description and Contact Info for brevity, assuming real data */}
+
             {/* Confidential Therapist Notes Section */}
             <div>
                  <h3 className="text-sm font-medium text-indigo-700 mb-2 flex items-center gap-1.5">
-                    <FileText className="h-4 w-4"/> Confidential Notes
+                    <FileText className="h-4 w-4"/> Confidential Notes History
                  </h3>
                  {(() => {
                     const patientNotes = selectedAppointment ? getAllTherapistNotesForPatient(selectedAppointment.patientName) : [];
@@ -607,7 +591,7 @@ const TherapistAppointmentsPage = () => {
                         <div className="space-y-3">
                             {patientNotes.map((note, index) => (
                                 <div key={index} className="text-sm p-3 bg-indigo-50/50 rounded border border-indigo-100 shadow-sm">
-                                    <p className="text-gray-800 mb-1.5 whitespace-pre-wrap">{note.text}</p> {/* Added whitespace-pre-wrap */}
+                                    <p className="text-gray-800 mb-1.5 whitespace-pre-wrap">{note.text}</p>
                                     <p className="text-xs text-indigo-600">
                                         Noted by {note.author} on {formatNoteTimestamp(note.timestamp)}
                                     </p>
