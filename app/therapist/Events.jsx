@@ -40,6 +40,7 @@ import {
   Bell, // Icon for Notifications
   ListFilter // Icon for showing calendar view again
 } from 'lucide-react';
+import DispositionDialog from './DispositionDialog';
 
 // --- Utility Functions ---
 
@@ -499,73 +500,18 @@ const TherapistAppointmentsPage = () => {
       {/* --- Dialogs --- */}
 
       {/* Disposition and Therapist Note Dialog */}
-      <Dialog open={dispositionDialogOpen} onOpenChange={setDispositionDialogOpen}>
-        <DialogContent className="sm:max-w-lg">
-          <DialogHeader>
-            <DialogTitle className="text-lg font-semibold text-blue-900">Record Outcome & Notes</DialogTitle>
-            <DialogDescription className="text-sm text-gray-600"> For session with {selectedAppointment?.patientName} </DialogDescription>
-          </DialogHeader>
-          <div className="grid gap-6 py-4">
-            {/* Disposition Section (Now Optional for Saving) */}
-            <div className="space-y-1.5">
-              <Label htmlFor="disposition" className="text-sm font-medium text-gray-700">
-                Disposition
-                {/* Removed mandatory indicator visually, but handled in save logic */}
-              </Label>
-              <Select value={disposition} onValueChange={setDisposition}>
-                <SelectTrigger id="disposition" className="text-sm focus:ring-blue-500">
-                  {/* Changed placeholder to reflect optional nature for saving notes */}
-                  <SelectValue placeholder="Select disposition (optional if adding note)" />
-                </SelectTrigger>
-                <SelectContent>
-                  {/* Added an empty value option to allow clearing */}
-                  <SelectItem value="no disposition" className="text-sm text-gray-500 italic">-- No Disposition --</SelectItem>
-                  <SelectItem value="ringing and LVM" className="text-sm">Ringing and LVM</SelectItem>
-                  <SelectItem value="FFS booked" className="text-sm">FFS Booked</SelectItem>
-                  <SelectItem value="No show" className="text-sm">No Show</SelectItem>
-                  <SelectItem value="Rescheduled" className="text-sm">Rescheduled</SelectItem>
-                  <SelectItem value="Completed" className="text-sm">Completed</SelectItem>
-                  <SelectItem value="Technical Issues" className="text-sm">Technical Issues</SelectItem>
-                  <SelectItem value="Needs Follow-up" className="text-sm">Needs Follow-up</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            {/* Disposition Notes Section */}
-            <div className="space-y-1.5">
-              <Label htmlFor="disposition-notes" className="text-sm font-medium text-gray-700">Disposition Notes</Label>
-              <Textarea
-                id="disposition-notes" placeholder="Add brief notes related to the disposition..." value={dispositionNotes}
-                onChange={(e) => setDispositionNotes(e.target.value)}
-                className="min-h-[80px] text-sm focus:ring-blue-500 focus:border-blue-500"
-              />
-            </div>
-             {/* Therapist Confidential Notes Section */}
-            <div className="space-y-1.5 border-t pt-4 mt-2 border-dashed border-slate-300">
-              <Label htmlFor="therapist-notes" className="text-sm font-medium text-indigo-700 flex items-center gap-1.5">
-                 <FileText className="h-4 w-4"/> Confidential Therapist Note
-              </Label>
-               <p className="text-xs text-slate-500">This note is confidential and linked to this session.</p>
-              <Textarea
-                id="therapist-notes" placeholder="Add confidential notes for your records..." value={therapistNoteText}
-                onChange={(e) => setTherapistNoteText(e.target.value)}
-                className="min-h-[120px] text-sm focus:ring-indigo-500 focus:border-indigo-500 bg-indigo-50/30"
-              />
-            </div>
-          </div>
-          <DialogFooter>
-            <Button size="sm" variant="outline" onClick={() => setDispositionDialogOpen(false)}>Cancel</Button>
-            <Button
-              size="sm"
-              onClick={handleSaveDisposition}
-              className="bg-blue-600 hover:bg-blue-700 text-white disabled:opacity-50"
-              // Enable save if EITHER disposition is selected OR therapist note has text
-              disabled={!disposition && !therapistNoteText.trim()}
-            >
-                Save Changes
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <DispositionDialog
+        dispositionDialogOpen={dispositionDialogOpen}
+        setDispositionDialogOpen={setDispositionDialogOpen}
+        selectedAppointment={selectedAppointment}
+        disposition={disposition}
+        setDisposition={setDisposition}
+        dispositionNotes={dispositionNotes}
+        setDispositionNotes={setDispositionNotes}
+        therapistNoteText={therapistNoteText}
+        setTherapistNoteText={setTherapistNoteText}
+        handleSaveDisposition={handleSaveDisposition}
+      />
 
       {/* Patient Details Dialog (Includes Therapist Notes History) */}
       <Dialog open={patientDetailsDialogOpen} onOpenChange={setPatientDetailsDialogOpen}>
