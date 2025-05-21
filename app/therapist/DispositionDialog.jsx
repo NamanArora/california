@@ -6,6 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { FileText } from 'lucide-react';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 const DispositionDialog = ({
   dispositionDialogOpen,
@@ -21,6 +22,9 @@ const DispositionDialog = ({
 }) => {
   // New state for insurance verification question
   const [verifyInsurance, setVerifyInsurance] = useState(null); // null, "yes", "no"
+  
+  // New state for FFS booking confirmation
+  const [hasBookedFFS, setHasBookedFFS] = useState("no"); // "yes", "no"
   
   // New state for modality and diagnosis
   const [modality, setModality] = useState("none"); 
@@ -43,6 +47,32 @@ const DispositionDialog = ({
       setModality("none");
       setDiagnosisCode("none");
     }
+    if (value !== "Consult done and FFS booked") {
+      setHasBookedFFS("no");
+    }
+  };
+
+  // Check if save button should be disabled
+  const isSaveDisabled = () => {
+    // If no disposition and no therapist note, disable save
+    if (!disposition && !therapistNoteText.trim()) {
+      return true;
+    }
+    
+    // If selected "Consult done and FFS booked" but hasn't booked FFS, disable save
+    if (disposition === "Consult done and FFS booked" && hasBookedFFS === "no") {
+      return true;
+    }
+    
+    return false;
+  };
+
+  // Tooltip content based on save button state
+  const getSaveButtonTooltip = () => {
+    if (disposition === "Consult done and FFS booked" && hasBookedFFS === "no") {
+      return "You need to book the first free session before saving";
+    }
+    return "";
   };
 
   return (
@@ -68,6 +98,7 @@ const DispositionDialog = ({
                 <SelectItem value="no disposition" className="text-sm text-gray-500 italic">-- No Disposition --</SelectItem>
                 <SelectItem value="ringing and LVM" className="text-sm">Ringing and LVM</SelectItem>
                 <SelectItem value="FFS booked" className="text-sm">FFS Booked</SelectItem>
+                <SelectItem value="Consult done and FFS booked" className="text-sm">Consult done and first free session booked</SelectItem>
                 <SelectItem value="No show" className="text-sm">No Show</SelectItem>
                 <SelectItem value="Rescheduled" className="text-sm">Rescheduled</SelectItem>
                 <SelectItem value="Completed" className="text-sm">Completed</SelectItem>
@@ -76,6 +107,31 @@ const DispositionDialog = ({
               </SelectContent>
             </Select>
           </div>
+
+          {/* FFS Booking Confirmation - Only show when "Consult done and FFS booked" is selected */}
+          {disposition === "Consult done and FFS booked" && (
+            <div className="p-3 bg-green-50 rounded-md border border-green-100">
+              <div className="flex items-center gap-8 justify-between">
+                <Label className="text-sm font-medium text-green-800 flex-shrink-0 flex-grow">
+                  Have you booked FFS session for the client?
+                </Label>
+                <RadioGroup 
+                  value={hasBookedFFS} 
+                  onValueChange={setHasBookedFFS}
+                  className="flex gap-8 flex-shrink-0"
+                >
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="yes" id="ffs-booked-yes" />
+                    <Label htmlFor="ffs-booked-yes" className="text-sm">Yes</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="no" id="ffs-booked-no" />
+                    <Label htmlFor="ffs-booked-no" className="text-sm">No</Label>
+                  </div>
+                </RadioGroup>
+              </div>
+            </div>
+          )}
 
           {/* Insurance Verification Question - Only show when FFS booked is selected */}
           {disposition === "FFS booked" && (
@@ -184,15 +240,27 @@ const DispositionDialog = ({
           <Button size="sm" variant="outline" onClick={() => setDispositionDialogOpen(false)}>
             Cancel
           </Button>
-          <Button
-            size="sm"
-            onClick={handleSaveDisposition}
-            className="bg-blue-600 hover:bg-blue-700 text-white disabled:opacity-50"
-            // Enable save if EITHER disposition is selected OR therapist note has text
-            disabled={!disposition && !therapistNoteText.trim()}
-          >
-            Save Changes
-          </Button>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div>
+                  <Button
+                    size="sm"
+                    onClick={handleSaveDisposition}
+                    className="bg-blue-600 hover:bg-blue-700 text-white disabled:opacity-50"
+                    disabled={isSaveDisabled()}
+                  >
+                    Save Changes
+                  </Button>
+                </div>
+              </TooltipTrigger>
+              {getSaveButtonTooltip() && (
+                <TooltipContent>
+                  <p>{getSaveButtonTooltip()}</p>
+                </TooltipContent>
+              )}
+            </Tooltip>
+          </TooltipProvider>
         </DialogFooter>
       </DialogContent>
     </Dialog>
