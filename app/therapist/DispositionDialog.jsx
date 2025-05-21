@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { FileText } from 'lucide-react';
+import { FileText, Calendar, ExternalLink } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 const DispositionDialog = ({
@@ -50,6 +50,11 @@ const DispositionDialog = ({
     if (value !== "Consult done and FFS booked") {
       setHasBookedFFS("no");
     }
+    
+    // Open calendar links in a new tab if they're clicked
+    if (value === "Consult done and FFS booked") {
+      // No immediate action needed, but we could add analytics tracking here
+    }
   };
 
   // Check if save button should be disabled
@@ -67,10 +72,10 @@ const DispositionDialog = ({
     return false;
   };
 
-  // Tooltip content based on save button state
+  // Get tooltip content based on save button state
   const getSaveButtonTooltip = () => {
     if (disposition === "Consult done and FFS booked" && hasBookedFFS === "no") {
-      return "You need to book the first free session before saving";
+      return "You need to book the first free session before saving. Click one of the therapist calendar buttons above.";
     }
     return "";
   };
@@ -110,25 +115,75 @@ const DispositionDialog = ({
 
           {/* FFS Booking Confirmation - Only show when "Consult done and FFS booked" is selected */}
           {disposition === "Consult done and FFS booked" && (
-            <div className="p-3 bg-green-50 rounded-md border border-green-100">
-              <div className="flex items-center gap-8 justify-between">
-                <Label className="text-sm font-medium text-green-800 flex-shrink-0 flex-grow">
-                  Have you booked FFS session for the client?
+            <div className="p-3 bg-green-50 rounded-md border border-green-100 space-y-4">
+              {/* Therapist Calendar Buttons */}
+              <div className="space-y-2">
+                <Label className="text-sm font-medium text-green-800">
+                  Book FFS session with a therapist:
                 </Label>
-                <RadioGroup 
-                  value={hasBookedFFS} 
-                  onValueChange={setHasBookedFFS}
-                  className="flex gap-8 flex-shrink-0"
-                >
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="yes" id="ffs-booked-yes" />
-                    <Label htmlFor="ffs-booked-yes" className="text-sm">Yes</Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="no" id="ffs-booked-no" />
-                    <Label htmlFor="ffs-booked-no" className="text-sm">No</Label>
-                  </div>
-                </RadioGroup>
+                <div className="flex flex-wrap gap-2">
+                  <a href="#/calendar/mariam" target="_blank" rel="noopener noreferrer">
+                    <Button 
+                      type="button" 
+                      variant="outline" 
+                      size="sm"
+                      className="bg-white border-green-300 text-green-700 hover:bg-green-50"
+                    >
+                      <Calendar className="mr-1 h-4 w-4" />
+                      Mariam
+                      <ExternalLink className="ml-1 h-3 w-3" />
+                    </Button>
+                  </a>
+                  <a href="#/calendar/geetanjali" target="_blank" rel="noopener noreferrer">
+                    <Button 
+                      type="button" 
+                      variant="outline" 
+                      size="sm"
+                      className="bg-white border-green-300 text-green-700 hover:bg-green-50"
+                    >
+                      <Calendar className="mr-1 h-4 w-4" />
+                      Geetanjali
+                      <ExternalLink className="ml-1 h-3 w-3" />
+                    </Button>
+                  </a>
+                  <a href="#/calendar/geeta" target="_blank" rel="noopener noreferrer">
+                    <Button 
+                      type="button" 
+                      variant="outline" 
+                      size="sm"
+                      className="bg-white border-green-300 text-green-700 hover:bg-green-50"
+                    >
+                      <Calendar className="mr-1 h-4 w-4" />
+                      Geeta
+                      <ExternalLink className="ml-1 h-3 w-3" />
+                    </Button>
+                  </a>
+                </div>
+                <p className="text-xs text-green-700 italic mt-1">
+                  Click on a therapist's name to open their calendar in a new tab
+                </p>
+              </div>
+
+              <div className="border-t border-green-200 pt-3">
+                <div className="flex items-center gap-8 justify-between">
+                  <Label className="text-sm font-medium text-green-800 flex-shrink-0 flex-grow">
+                    Have you booked FFS session for the client?
+                  </Label>
+                  <RadioGroup 
+                    value={hasBookedFFS} 
+                    onValueChange={setHasBookedFFS}
+                    className="flex gap-8 flex-shrink-0"
+                  >
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="yes" id="ffs-booked-yes" />
+                      <Label htmlFor="ffs-booked-yes" className="text-sm">Yes</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="no" id="ffs-booked-no" />
+                      <Label htmlFor="ffs-booked-no" className="text-sm">No</Label>
+                    </div>
+                  </RadioGroup>
+                </div>
               </div>
             </div>
           )}
