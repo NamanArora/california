@@ -39,22 +39,6 @@ const LandingPage: React.FC = () => {
   const [showSuccessModal, setShowSuccessModal] = useState<boolean>(false);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
-  const formatPhoneNumber = (value: string): string => {
-    const numbers = value.replace(/\D/g, '');
-    if (numbers.length <= 10) {
-      if (numbers.length === 10) {
-        return `+1 (${numbers.slice(0, 3)}) ${numbers.slice(3, 6)}-${numbers.slice(6)}`;
-      } else if (numbers.length > 6) {
-        return `+1 (${numbers.slice(0, 3)}) ${numbers.slice(3, 6)}-${numbers.slice(6)}`;
-      } else if (numbers.length > 3) {
-        return `+1 (${numbers.slice(0, 3)}) ${numbers.slice(3)}`;
-      } else if (numbers.length > 0) {
-        return `+1 (${numbers}`;
-      }
-    }
-    return value; // Return original value if it exceeds 10 digits or is empty initially
-  };
-
   const handlePhoneSubmit = async (e: React.FormEvent<HTMLFormElement> | React.KeyboardEvent<HTMLInputElement>) => {
     e.preventDefault(); // Use preventDefault directly on the event
 
@@ -328,7 +312,7 @@ const LandingPage: React.FC = () => {
                     <input
                       type="tel"
                       value={phoneNumber}
-                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPhoneNumber(formatPhoneNumber(e.target.value))}
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPhoneNumber(e.target.value)}
                       placeholder="Enter your phone number"
                       className="w-full pl-14 pr-4 py-4 border-2 border-gray-200 rounded-2xl focus:border-[#2B6CB8] focus:ring-4 focus:ring-blue-100 transition-all duration-200 text-gray-800 text-lg font-medium"
                       aria-label="Phone number input"
@@ -351,22 +335,22 @@ const LandingPage: React.FC = () => {
                   </button>
                 </form>
 
-                  {/* Trust Indicators */}
-                  <div className="grid grid-cols-3 gap-4 pt-4 border-t border-gray-100 mt-6"> {/* Added margin top */}
-                    <div className="text-center">
-                      <Shield className="h-8 w-8 text-green-500 mx-auto mb-2" />
-                      <div className="text-xs font-medium text-gray-600">HIPAA Secure</div>
-                    </div>
-                    <div className="text-center">
-                      <Lock className="h-8 w-8 text-green-500 mx-auto mb-2" />
-                      <div className="text-xs font-medium text-gray-600">Private</div>
-                    </div>
-                    <div className="text-center">
-                      <CheckCircle className="h-8 w-8 text-green-500 mx-auto mb-2" />
-                      <div className="text-xs font-medium text-gray-600">No Storage</div>
-                    </div>
+                {/* Trust Indicators */}
+                <div className="grid grid-cols-3 gap-4 pt-4 border-t border-gray-100 mt-6"> {/* Added margin top */}
+                  <div className="text-center">
+                    <Shield className="h-8 w-8 text-green-500 mx-auto mb-2" />
+                    <div className="text-xs font-medium text-gray-600">HIPAA Secure</div>
+                  </div>
+                  <div className="text-center">
+                    <Lock className="h-8 w-8 text-green-500 mx-auto mb-2" />
+                    <div className="text-xs font-medium text-gray-600">Private</div>
+                  </div>
+                  <div className="text-center">
+                    <CheckCircle className="h-8 w-8 text-green-500 mx-auto mb-2" />
+                    <div className="text-xs font-medium text-gray-600">No Storage</div>
                   </div>
                 </div>
+              </div>
             </div>
           </div>
         </div>
@@ -553,7 +537,7 @@ const LandingPage: React.FC = () => {
           </button>
 
           <div className="flex justify-center space-x-4 text-sm">
-            <button className="text-[#2B6CB8] hover:underline" onClick={() => {/* Resend OTP logic here */}}>Didn't receive code? Resend</button>
+            <button className="text-[#2B6CB8] hover:underline" onClick={() => {/* Resend OTP logic here */ }}>Didn't receive code? Resend</button>
             <span className="text-gray-400">|</span>
             <button
               onClick={() => {
