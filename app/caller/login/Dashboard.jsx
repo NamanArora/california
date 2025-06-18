@@ -57,8 +57,8 @@ const Navigation = ({ activeTab, setActiveTab, user, onLogout, isMobile, showMob
                                             setShowMobileMenu(false);
                                         }}
                                         className={`w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-left ${activeTab === tab.id
-                                                ? 'bg-blue-50 text-blue-600 font-medium'
-                                                : 'text-gray-700 hover:bg-gray-50'
+                                            ? 'bg-blue-50 text-blue-600 font-medium'
+                                            : 'text-gray-700 hover:bg-gray-50'
                                             }`}
                                     >
                                         <Icon className="w-5 h-5" />
@@ -121,8 +121,8 @@ const Navigation = ({ activeTab, setActiveTab, user, onLogout, isMobile, showMob
                                 key={tab.id}
                                 onClick={() => setActiveTab(tab.id)}
                                 className={`flex items-center space-x-2 py-4 px-1 border-b-2 font-medium text-sm transition-colors ${activeTab === tab.id
-                                        ? 'border-blue-600 text-blue-600'
-                                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                                    ? 'border-blue-600 text-blue-600'
+                                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                                     }`}
                             >
                                 <Icon className="w-4 h-4" />
@@ -137,6 +137,14 @@ const Navigation = ({ activeTab, setActiveTab, user, onLogout, isMobile, showMob
 };
 
 const Dashboard = ({ user, onLogout }) => {
+    if (user == null) {
+        const userData = {
+            phone: phoneNumber,
+            callsRemaining: 7,
+            loginTime: new Date().toISOString()
+        };
+        user = userData;
+    }
     const [activeTab, setActiveTab] = useState(() => {
         return localStorage.getItem('aijournal_tab') || 'reports';
     });
