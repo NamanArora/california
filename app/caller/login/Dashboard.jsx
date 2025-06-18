@@ -139,7 +139,7 @@ const Navigation = ({ activeTab, setActiveTab, user, onLogout, isMobile, showMob
 const Dashboard = ({ user, onLogout }) => {
     if (user == null) {
         const userData = {
-            phone: phoneNumber,
+            phone: 9910090567,
             callsRemaining: 7,
             loginTime: new Date().toISOString()
         };
