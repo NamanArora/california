@@ -38,7 +38,8 @@ import {
   Clipboard, // Used for 'Add Disposition' state
   MessageSquare, // Icon representing notes added this session
   Bell, // Icon for Notifications
-  ListFilter // Icon for showing calendar view again
+  ListFilter, // Icon for showing calendar view again
+  CalendarClock,
 } from 'lucide-react';
 import DispositionDialog from './DispositionDialog';
 
@@ -522,6 +523,65 @@ const TherapistAppointmentsPage = () => {
           </DialogHeader>
           <div className="space-y-5 py-4 max-h-[70vh] overflow-y-auto pr-2">
             {/* Removed Sample Case Description and Contact Info for brevity, assuming real data */}
+
+            {/* Activities Section */}
+            <div>
+              <h3 className="text-sm font-medium text-indigo-700 mb-2 flex items-center gap-1.5">
+                <CalendarClock className="h-4 w-4"/> Patient Activities
+              </h3>
+              <div className="max-h-[50px] overflow-y-auto pr-1 pb-1 scrollbar-thin scrollbar-thumb-blue-200 scrollbar-track-transparent">
+                {(() => {
+                  // Sample activities data - replace with actual data source
+                  const sampleActivities = [
+                    {
+                      name: "Mindfulness Exercise",
+                      timestamp: new Date(2025, 4, 15, 14, 30),
+                      notes: "Patient completed a 15-minute guided meditation session. Reported feeling more centered afterward and expressed interest in continuing this practice at home."
+                    },
+                    {
+                      name: "CBT Homework Review",
+                      timestamp: new Date(2025, 4, 10, 9, 45),
+                      notes: "Reviewed thought records from the past week. Patient showed improvement in identifying cognitive distortions, particularly catastrophizing. Discussed strategies for challenging these thoughts more effectively."
+                    },f
+                  ];
+                  
+                  const patientActivities = selectedAppointment ? 
+                    // Use this when implementing real data:
+                    // getPatientActivities(selectedAppointment.patientName)
+                    sampleActivities : [];
+                    
+                  if (patientActivities.length === 0) {
+                    return <p className="text-sm text-gray-500 italic px-2">No activities recorded for this client.</p>;
+                  }
+                  
+                  // Simple timestamp formatter
+                  const formatActivityTimestamp = (timestamp) => {
+                    return new Intl.DateTimeFormat('en-US', {
+                      month: 'short',
+                      day: 'numeric',
+                      year: 'numeric',
+                      hour: 'numeric',
+                      minute: '2-digit',
+                      hour12: true
+                    }).format(timestamp);
+                  };
+                  
+                  return (
+                    <div className="space-y-3">
+                      {patientActivities.map((activity, index) => (
+                        <div key={index} className="text-sm p-3 bg-blue-50/50 rounded border border-blue-100 shadow-sm">
+                          <div className="flex justify-between items-start mb-1">
+                            <h4 className="font-medium text-blue-800">{activity.name}</h4>
+                            <span className="text-xs text-blue-600">{formatActivityTimestamp(activity.timestamp)}</span>
+                          </div>
+                          <p className="text-gray-700 whitespace-pre-wrap">{activity.notes}</p>
+                        </div>
+                      ))}
+                    </div>
+                  );
+                })()}
+              </div>
+            </div>
 
             {/* Confidential Therapist Notes Section */}
             <div>

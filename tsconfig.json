@@ -1,7 +1,11 @@
 {
   "compilerOptions": {
     "target": "ES2017",
-    "lib": ["dom", "dom.iterable", "esnext"],
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext"
+    ],
     "allowJs": true,
     "skipLibCheck": true,
     "strict": true,
@@ -19,9 +23,25 @@
       }
     ],
     "paths": {
-      "@/*": ["./*"]
+      "@/*": [
+        "./*"
+      ]
     }
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "app/therapist/Events.jsx", "app/therapist/DispositionDialog.jsx"],
-  "exclude": ["node_modules"]
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    ".next/types/**/*.ts",
+    "app/therapist/Events.jsx",
+    "app/therapist/DispositionDialog.jsx",
+    "app/caller/login/Dashboard.jsx",
+    "app/caller/login/HomeTab.jsx",
+    "app/caller/login/page.jsx",
+    "app/caller/login/ReportsTab.jsx",
+    "app/caller/login/SettingsTab.jsx"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
 }
