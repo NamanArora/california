@@ -22,7 +22,7 @@ const useAuth = () => {
 
   const login = (phoneNumber) => {
     const userData = {
-      phone: phoneNumber,
+      phone: 9910090567,
       callsRemaining: 7,
       loginTime: new Date().toISOString()
     };
