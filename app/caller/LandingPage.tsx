@@ -255,7 +255,7 @@ const LandingPage: React.FC = () => {
                   {/* Using placeholder images that would represent diverse Indian professionals */}
                   <div className="relative group">
                     <img
-                      src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face"
+                      src="https://images.pexels.com/photos/7580971/pexels-photo-7580971.jpeg?w=150&h=150"
                       alt="Happy professional"
                       className="w-full h-24 object-cover rounded-2xl shadow-lg group-hover:scale-105 transition-transform duration-300"
                     />
@@ -266,7 +266,7 @@ const LandingPage: React.FC = () => {
 
                   <div className="relative group">
                     <img
-                      src="https://images.unsplash.com/photo-1494790108755-2616b612b524?w=150&h=150&fit=crop&crop=face"
+                      src="https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e"
                       alt="Peaceful woman"
                       className="w-full h-24 object-cover rounded-2xl shadow-lg group-hover:scale-105 transition-transform duration-300"
                     />
